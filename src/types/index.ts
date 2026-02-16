@@ -1,0 +1,65 @@
+export interface Party {
+  id: string;
+  name: string;
+  created_at: string;
+}
+
+export interface JobWorkType {
+  id: string;
+  name: string;
+  active: boolean;
+}
+
+export interface WorkOrderItem {
+  id: string;
+  work_order_id: string;
+  job_work_type_id: string;
+  job_work_type_name: string;
+  quantity: number;
+  pending_quantity: number;
+}
+
+export type WorkOrderStatus = "Not Yet Started" | "In Progress" | "Completed";
+
+export interface WorkOrder {
+  id: string;
+  work_order_number: string;
+  received_date: string;
+  party_id: string;
+  party_name: string;
+  items: WorkOrderItem[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DeliveryChallan {
+  id: string;
+  dc_number: string;
+  generated_date: string;
+  party_id: string;
+  party_name: string;
+  transporter_name: string | null;
+  items: DCItem[];
+  linked_work_order_ids: string[];
+}
+
+export interface DCItem {
+  id: string;
+  work_order_item_id: string;
+  job_work_type_name: string;
+  quantity: number;
+}
+
+// Derived helpers
+export function getWorkOrderTotals(wo: WorkOrder) {
+  const total_quantity = wo.items.reduce((s, i) => s + i.quantity, 0);
+  const total_pending = wo.items.reduce((s, i) => s + i.pending_quantity, 0);
+  return { total_quantity, total_pending };
+}
+
+export function getWorkOrderStatus(wo: WorkOrder): WorkOrderStatus {
+  const { total_quantity, total_pending } = getWorkOrderTotals(wo);
+  if (total_pending === 0) return "Completed";
+  if (total_pending < total_quantity) return "In Progress";
+  return "Not Yet Started";
+}

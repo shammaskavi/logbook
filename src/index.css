@@ -1,0 +1,111 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 96%;
+    --foreground: 150 15% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 150 15% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 150 15% 15%;
+
+    --primary: 150 25% 20%;
+    --primary-foreground: 40 30% 95%;
+
+    --secondary: 40 15% 92%;
+    --secondary-foreground: 150 15% 15%;
+
+    --muted: 40 10% 94%;
+    --muted-foreground: 150 5% 45%;
+
+    --accent: 43 80% 50%;
+    --accent-foreground: 150 25% 12%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 40 10% 88%;
+    --input: 40 10% 88%;
+    --ring: 150 25% 20%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 150 20% 16%;
+    --sidebar-foreground: 40 20% 85%;
+    --sidebar-primary: 43 80% 50%;
+    --sidebar-primary-foreground: 150 25% 12%;
+    --sidebar-accent: 150 18% 22%;
+    --sidebar-accent-foreground: 40 20% 90%;
+    --sidebar-border: 150 15% 22%;
+    --sidebar-ring: 43 80% 50%;
+
+    /* Status colors */
+    --status-completed: 145 63% 42%;
+    --status-completed-bg: 145 63% 95%;
+    --status-in-progress: 30 90% 50%;
+    --status-in-progress-bg: 30 90% 95%;
+    --status-not-started: 40 10% 55%;
+    --status-not-started-bg: 40 10% 94%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+}
+
+/* =========================
+   PRINT STYLES – DC PREVIEW
+   ========================= */
+
+@media print {
+
+  /* Hide everything */
+  body * {
+    visibility: hidden !important;
+  }
+
+  /* Show only the DC */
+  .dc-print,
+  .dc-print * {
+    visibility: visible !important;
+  }
+
+  /* Position DC correctly on page */
+  .dc-print {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Remove modal & app chrome */
+  .dialog-content,
+  .dialog-overlay {
+    display: none !important;
+  }
+
+  /* Remove shadows & backgrounds */
+  * {
+    box-shadow: none !important;
+    background: white !important;
+  }
+
+  /* Page setup */
+  @page {
+    size: A4;
+    margin: 16mm;
+  }
+}
