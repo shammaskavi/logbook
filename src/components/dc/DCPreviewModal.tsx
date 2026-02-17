@@ -1,5 +1,3 @@
-
-
 import { useEffect, useMemo } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -75,6 +73,7 @@ export function DCPreviewModal({ dcId, open, onClose }: DCPreviewModalProps) {
                             dcNumber={dc.dc_number}
                             dcDate={dc.generated_date}
                             partyName={dc.party_name}
+                            partyGSTIN={dc.party_gstin}
                             transporterName={dc.transporter_name}
                             items={items}
                         />

@@ -60,9 +60,17 @@ export function DCPreview({
             {/* Party + DC Info */}
             <div className="grid grid-cols-2 gap-4 mb-6">
                 <div>
-                    <div className="font-semibold">To:</div>
+                    {/* <div className="font-semibold">To:</div>
                     <div className="font-medium">{partyName}</div>
-                    {partyGSTIN && <div>GSTIN: {partyGSTIN}</div>}
+                     */}
+                    <div className="mt-1">
+                        <span className="font-semibold">To:</span> {partyName}
+                    </div>
+                    {partyGSTIN && (
+                        <div className="mt-1">
+                            <span className="font-semibold">Party's GSTIN:</span> {partyGSTIN}
+                        </div>
+                    )}
                 </div>
 
                 <div className="text-right space-y-1">
@@ -81,7 +89,7 @@ export function DCPreview({
                 <thead>
                     <tr className="border-b border-black">
                         <th className="border-r border-black px-2 py-1 text-left">
-                            Work Order No.
+                            WO No.
                         </th>
                         <th className="border-r border-black px-2 py-1 text-left">
                             Particulars

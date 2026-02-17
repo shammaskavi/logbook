@@ -141,6 +141,7 @@ export function useDeliveryChallans() {
         generated_date: dc.generated_date,
         party_id: dc.party_id,
         party_name: dc.party_name,
+        party_gstin: dc.party_gstin,
         transporter_name: dc.transporter_name,
         items: items
           .filter(i => i.delivery_challan_id === dc.id)

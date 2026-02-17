@@ -38,13 +38,16 @@ export interface DeliveryChallan {
   generated_date: string;
   party_id: string;
   party_name: string;
+  party_gstin?: string | null;
   transporter_name: string | null;
   items: DCItem[];
-  linked_work_order_ids: string[];
+  linked_work_order_ids: string[] | null;
+  created_at?: string;
 }
 
 export interface DCItem {
   id: string;
+  delivery_challan_id?: string;
   work_order_item_id: string;
   job_work_type_name: string;
   quantity: number;
