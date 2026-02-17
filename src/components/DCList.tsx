@@ -87,106 +87,108 @@ export default function DCList() {
   return (
     <>
       {/* Filters */}
-      <div className="flex items-center gap-3 mb-4 flex-wrap">
+      <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3">
         <span className="text-sm font-medium text-muted-foreground">Filter</span>
         <Select value={filterMonth} onValueChange={setFilterMonth}>
-          <SelectTrigger className="w-[110px] h-9 bg-card"><SelectValue placeholder="Month" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[110px] h-9 bg-card"><SelectValue placeholder="Month" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Months</SelectItem>
             {MONTHS.map((m, i) => <SelectItem key={i} value={String(i)}>{m}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={filterParty} onValueChange={setFilterParty}>
-          <SelectTrigger className="w-[130px] h-9 bg-card"><SelectValue placeholder="Party" /></SelectTrigger>
+          <SelectTrigger className="w-full sm:w-[130px] h-9 bg-card"><SelectValue placeholder="Party" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Parties</SelectItem>
             {parties.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
           </SelectContent>
         </Select>
         {selectedIds.size > 0 && (
-          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="ml-2">
+          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="w-full sm:w-auto">
             <Trash2 className="w-4 h-4 mr-1" />
             Delete ({selectedIds.size})
           </Button>
         )}
-        <div className="ml-auto relative">
+        <div className="relative w-full sm:ml-auto sm:w-[220px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input placeholder="Search" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9 w-[200px] h-9 bg-card" />
+          <Input placeholder="Search" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-9 w-full h-9 bg-card" />
         </div>
       </div>
 
       {/* Table */}
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <div className="grid grid-cols-[40px_130px_1fr_130px_90px_120px_1fr_80px] items-center px-4 py-3 text-xs font-medium text-muted-foreground border-b border-border">
-          <div><Checkbox checked={selectedIds.size === filtered.length && filtered.length > 0} onCheckedChange={toggleSelectAll} /></div>
-          <div>Generated Date</div>
-          <div>Party Name</div>
-          <div>DC No.</div>
-          <div className="text-center">Job Work</div>
-          <div className="text-center">Quantity ({totalQty})</div>
-          <div>Transporter</div>
-          <div></div>
-        </div>
+        <div className="overflow-x-auto">
+          <div className="min-w-[950px] grid grid-cols-[40px_130px_1fr_130px_90px_120px_1fr_80px] items-center px-4 py-3 text-xs font-medium text-muted-foreground border-b border-border">
+            <div><Checkbox checked={selectedIds.size === filtered.length && filtered.length > 0} onCheckedChange={toggleSelectAll} /></div>
+            <div>Generated Date</div>
+            <div>Party Name</div>
+            <div>DC No.</div>
+            <div className="text-center">Job Work</div>
+            <div className="text-center">Quantity ({totalQty})</div>
+            <div>Transporter</div>
+            <div></div>
+          </div>
 
-        {filtered.length === 0 && <div className="text-center py-12 text-muted-foreground">No delivery challans found</div>}
+          {filtered.length === 0 && <div className="text-center py-12 text-muted-foreground">No delivery challans found</div>}
 
-        {filtered.map(dc => {
-          const isExpanded = expandedId === dc.id;
-          const isSelected = selectedIds.has(dc.id);
-          const qty = dc.items.reduce((s, i) => s + i.quantity, 0);
+          {filtered.map(dc => {
+            const isExpanded = expandedId === dc.id;
+            const isSelected = selectedIds.has(dc.id);
+            const qty = dc.items.reduce((s, i) => s + i.quantity, 0);
 
-          return (
-            <div key={dc.id} className={`border-b border-border last:border-b-0 ${isExpanded ? "bg-muted/40" : ""}`}>
-              <div className="grid grid-cols-[40px_130px_1fr_130px_90px_120px_1fr_80px] items-center px-4 py-3.5 text-sm hover:bg-muted/30 transition-colors">
-                <div><Checkbox checked={isSelected} onCheckedChange={() => toggleSelect(dc.id)} /></div>
-                <div>{format(new Date(dc.generated_date), "d MMM yyyy")}</div>
-                <div className="font-medium">{dc.party_name}</div>
-                <div className="text-center">{dc.dc_number}</div>
-                <div className="text-center">{dc.items.length}</div>
-                <div className="text-center font-medium">{qty}</div>
-                <div className="text-muted-foreground">{dc.transporter_name || "—"}</div>
-                <div className="flex items-center gap-1 justify-end">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="p-1 rounded hover:bg-muted transition-colors">
-                        <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem><Download className="w-4 h-4 mr-2" />Download</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => openPreview(dc.id)}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        Preview
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => navigate(`/dc/${dc.id}/edit`)}><Pencil className="w-4 h-4 mr-2" />Edit DC</DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => handleDelete(dc.id)} className="text-destructive"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  <button onClick={() => setExpandedId(isExpanded ? null : dc.id)} className="p-1 rounded hover:bg-muted transition-colors">
-                    {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {isExpanded && (
-                <div className="px-4 pb-4 ml-10">
-                  <div className="bg-card rounded-lg border border-border overflow-hidden">
-                    <div className="grid grid-cols-[1fr_120px] px-4 py-2 text-xs font-medium text-muted-foreground border-b border-border">
-                      <div>Job Work</div>
-                      <div className="text-center">Quantity</div>
-                    </div>
-                    {dc.items.map(item => (
-                      <div key={item.id} className="grid grid-cols-[1fr_120px] px-4 py-2.5 text-sm border-b border-border last:border-b-0">
-                        <div>{item.job_work_type_name}</div>
-                        <div className="text-center font-medium">{item.quantity}</div>
-                      </div>
-                    ))}
+            return (
+              <div key={dc.id} className={`border-b border-border last:border-b-0 ${isExpanded ? "bg-muted/40" : ""}`}>
+                <div className="min-w-[950px] grid grid-cols-[40px_130px_1fr_130px_90px_120px_1fr_80px] items-center px-4 py-3.5 text-sm hover:bg-muted/30 transition-colors">
+                  <div><Checkbox checked={isSelected} onCheckedChange={() => toggleSelect(dc.id)} /></div>
+                  <div>{format(new Date(dc.generated_date), "d MMM yyyy")}</div>
+                  <div className="font-medium">{dc.party_name}</div>
+                  <div className="text-center">{dc.dc_number}</div>
+                  <div className="text-center">{dc.items.length}</div>
+                  <div className="text-center font-medium">{qty}</div>
+                  <div className="text-muted-foreground">{dc.transporter_name || "—"}</div>
+                  <div className="flex items-center gap-1 justify-end">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button className="p-1 rounded hover:bg-muted transition-colors">
+                          <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem><Download className="w-4 h-4 mr-2" />Download</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => openPreview(dc.id)}>
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => navigate(`/dc/${dc.id}/edit`)}><Pencil className="w-4 h-4 mr-2" />Edit DC</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleDelete(dc.id)} className="text-destructive"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    <button onClick={() => setExpandedId(isExpanded ? null : dc.id)} className="p-1 rounded hover:bg-muted transition-colors">
+                      {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-          );
-        })}
+
+                {isExpanded && (
+                  <div className="px-4 pb-4 ml-10">
+                    <div className="bg-card rounded-lg border border-border overflow-hidden">
+                      <div className="min-w-[400px] grid grid-cols-[1fr_120px] px-4 py-2 text-xs font-medium text-muted-foreground border-b border-border">
+                        <div>Job Work</div>
+                        <div className="text-center">Quantity</div>
+                      </div>
+                      {dc.items.map(item => (
+                        <div key={item.id} className="min-w-[400px] grid grid-cols-[1fr_120px] px-4 py-2.5 text-sm border-b border-border last:border-b-0">
+                          <div>{item.job_work_type_name}</div>
+                          <div className="text-center font-medium">{item.quantity}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       </div>
       <DCPreviewModal
         dcId={previewDcId}
