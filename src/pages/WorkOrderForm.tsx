@@ -120,9 +120,9 @@ export default function WorkOrderForm() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{isEdit ? "Edit Work Order" : "New Work Order"}</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Button variant="outline" onClick={() => navigate("/")}>Cancel</Button>
           <Button onClick={handleSave} disabled={addWO.isPending || updateWO.isPending}>
             {(addWO.isPending || updateWO.isPending) ? "Saving..." : "Save Work Order"}
@@ -131,7 +131,7 @@ export default function WorkOrderForm() {
       </div>
 
       <div className="bg-card rounded-lg border border-border p-6 mb-6">
-        <div className="grid grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div>
             <Label className="mb-2 block text-sm font-medium">Received Date</Label>
             <Popover>
@@ -151,7 +151,7 @@ export default function WorkOrderForm() {
             <Label className="mb-2 block text-sm font-medium">Party Name</Label>
             <div className="flex gap-2">
               <Select value={partyId} onValueChange={setPartyId}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select Party Name" />
                 </SelectTrigger>
                 <SelectContent>
@@ -182,29 +182,35 @@ export default function WorkOrderForm() {
       </div>
 
       <div className="bg-card rounded-lg border border-border overflow-hidden">
-        <div className="grid grid-cols-[1fr_200px_60px] px-6 py-3 text-xs font-medium text-muted-foreground border-b border-border">
+        <div className="hidden md:grid grid-cols-[1fr_200px_60px] px-6 py-3 text-xs font-medium text-muted-foreground border-b border-border">
           <div>Job Work</div>
           <div>Quantity</div>
           <div></div>
         </div>
 
         {items.map((item, idx) => (
-          <div key={item.id || idx} className="grid grid-cols-[1fr_200px_60px] px-6 py-3 items-center border-b border-border">
-            <Select value={item.job_work_type_id || ""} onValueChange={v => updateItem(idx, "job_work_type_id", v)}>
-              <SelectTrigger><SelectValue placeholder="Select Job Work" /></SelectTrigger>
-              <SelectContent>
-                {activeJobTypes.map(j => <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>)}
-              </SelectContent>
-            </Select>
-            <Input
-              type="number"
-              placeholder="Add Quantity"
-              value={item.quantity || ""}
-              onChange={e => updateItem(idx, "quantity", parseInt(e.target.value) || 0)}
-              className="w-40"
-              min={1}
-            />
-            <button onClick={() => removeItem(idx)} className="text-destructive hover:text-destructive/80 transition-colors p-2">
+          <div key={item.id || idx} className="flex flex-col gap-3 px-6 py-4 border-b border-border md:grid md:grid-cols-[1fr_200px_60px] md:items-center md:gap-0">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs text-muted-foreground md:hidden">Job Work</span>
+              <Select value={item.job_work_type_id || ""} onValueChange={v => updateItem(idx, "job_work_type_id", v)}>
+                <SelectTrigger className="w-full"><SelectValue placeholder="Select Job Work" /></SelectTrigger>
+                <SelectContent>
+                  {activeJobTypes.map(j => <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1 md:items-start">
+              <span className="text-xs text-muted-foreground md:hidden">Quantity</span>
+              <Input
+                type="number"
+                placeholder="Add Quantity"
+                value={item.quantity || ""}
+                onChange={e => updateItem(idx, "quantity", parseInt(e.target.value) || 0)}
+                className="w-full md:w-40"
+                min={1}
+              />
+            </div>
+            <button onClick={() => removeItem(idx)} className="self-end md:self-auto text-destructive hover:text-destructive/80 transition-colors p-2">
               <Trash2 className="w-4 h-4" />
             </button>
           </div>

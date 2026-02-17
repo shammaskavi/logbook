@@ -156,9 +156,9 @@ export default function DCForm() {
 
   return (
     <div className="p-6">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{isEdit ? "Edit DC" : "New Delivery Challan"}</h1>
-        <div className="flex gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <Button variant="outline" onClick={() => navigate(-1)}>
             Cancel
           </Button>
@@ -178,7 +178,7 @@ export default function DCForm() {
       </div>
 
       <div className="bg-card rounded-lg border border-border p-6 mb-6">
-        <div className="grid grid-cols-2 gap-6 mb-4">
+        <div className="grid grid-cols-1 gap-6 mb-4 md:grid-cols-2">
           <div>
             <Label className="mb-2 block text-sm font-medium">Generated Date</Label>
             <Popover>
@@ -196,14 +196,14 @@ export default function DCForm() {
           <div>
             <Label className="mb-2 block text-sm font-medium">Party Name</Label>
             <Select value={partyId} onValueChange={handlePartyChange}>
-              <SelectTrigger><SelectValue placeholder="Select Party" /></SelectTrigger>
+              <SelectTrigger className="w-full"><SelectValue placeholder="Select Party" /></SelectTrigger>
               <SelectContent>
                 {parties.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
             </Select>
           </div>
         </div>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <Label className="mb-2 block text-sm font-medium">DC Number</Label>
             <Input placeholder="Enter DC Number" value={dcNumber} onChange={e => setDcNumber(e.target.value)} />
@@ -226,7 +226,7 @@ export default function DCForm() {
               const selected = selectedWorkOrders.includes(wo.id);
               return (
                 <div key={wo.id} className={selected ? "bg-muted" : ""}>
-                  <div className="flex items-center justify-between px-6 py-4">
+                  <div className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-x-4">
                       <span className="font-medium">{wo.work_order_number}</span>
                       <span className="text-sm text-muted-foreground">
@@ -236,6 +236,7 @@ export default function DCForm() {
 
                     <input
                       type="checkbox"
+                      className="self-start sm:self-auto"
                       checked={selected}
                       onChange={() => toggleWorkOrder(wo.id)}
                     />
@@ -260,7 +261,7 @@ export default function DCForm() {
 
       {step === 2 && (
         <div className="bg-card rounded-lg border border-border overflow-hidden">
-          <div className="grid grid-cols-[1fr_150px_150px] px-6 py-3 text-xs font-medium text-muted-foreground border-b">
+          <div className="hidden md:grid grid-cols-[1fr_150px_150px] px-6 py-3 text-xs font-medium text-muted-foreground border-b">
             <div>Job Work</div>
             <div>Pending</div>
             <div>DC Qty</div>
@@ -269,23 +270,35 @@ export default function DCForm() {
           {items.map((item, idx) => (
             <div
               key={item.work_order_item_id}
-              className="grid grid-cols-[1fr_150px_150px] px-6 py-3 items-center border-t"
+              className="flex flex-col gap-3 px-6 py-4 border-t md:grid md:grid-cols-[1fr_150px_150px] md:items-center md:gap-0"
             >
-              <div>{item.job_work_type_name}</div>
-              <div>{item.pending_quantity}</div>
-              <Input
-                type="number"
-                min={1}
-                max={item.pending_quantity}
-                value={item.dc_quantity || ""}
-                onChange={e =>
-                  setItems(items.map((it, i) =>
-                    i === idx
-                      ? { ...it, dc_quantity: Number(e.target.value) || 0 }
-                      : it
-                  ))
-                }
-              />
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted-foreground md:hidden">Job Work</span>
+                <div>{item.job_work_type_name}</div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted-foreground md:hidden">Pending</span>
+                <div>{item.pending_quantity}</div>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <span className="text-xs text-muted-foreground md:hidden">DC Quantity</span>
+                <Input
+                  type="number"
+                  min={1}
+                  max={item.pending_quantity}
+                  value={item.dc_quantity || ""}
+                  onChange={e =>
+                    setItems(items.map((it, i) =>
+                      i === idx
+                        ? { ...it, dc_quantity: Number(e.target.value) || 0 }
+                        : it
+                    ))
+                  }
+                  className="w-full md:w-32"
+                />
+              </div>
             </div>
           ))}
         </div>
