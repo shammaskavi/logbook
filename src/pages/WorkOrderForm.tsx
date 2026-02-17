@@ -37,7 +37,9 @@ export default function WorkOrderForm() {
   const existingOrder = isEdit ? workOrders.find(w => w.id === id) : null;
 
   const [receivedDate, setReceivedDate] = useState<Date | undefined>(
-    existingOrder ? new Date(existingOrder.received_date) : undefined
+    existingOrder
+      ? new Date(existingOrder.received_date)
+      : new Date()
   );
   const [partyId, setPartyId] = useState(existingOrder?.party_id || "");
   const [workOrderNumber, setWorkOrderNumber] = useState(existingOrder?.work_order_number || "");

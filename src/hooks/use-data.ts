@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { createWorkOrder, updateWorkOrder } from "@/repositories/workOrders.repo";
+import { createWorkOrder, updateWorkOrder, deleteWorkOrderWithEffects } from "@/repositories/workOrders.repo";
 import { createDeliveryChallanWithEffects } from "@/repositories/deliveryChallans.repo";
 import { Party, JobWorkType, WorkOrder, WorkOrderItem, DeliveryChallan, DCItem } from "@/types";
 
@@ -102,11 +102,11 @@ export function useUpdateWorkOrder() {
 export function useDeleteWorkOrder() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("work_orders").delete().eq("id", id);
-      if (error) throw error;
+    mutationFn: (id: string) => deleteWorkOrderWithEffects(id),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["work_orders"] });
+      qc.invalidateQueries({ queryKey: ["delivery_challans"] });
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["work_orders"] }),
   });
 }
 
@@ -114,10 +114,14 @@ export function useDeleteWorkOrders() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from("work_orders").delete().in("id", ids);
-      if (error) throw error;
+      for (const id of ids) {
+        await deleteWorkOrderWithEffects(id);
+      }
     },
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["work_orders"] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["work_orders"] });
+      qc.invalidateQueries({ queryKey: ["delivery_challans"] });
+    },
   });
 }
 

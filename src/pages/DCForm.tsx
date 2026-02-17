@@ -30,11 +30,27 @@ export default function DCForm() {
 
   const existing = isEdit ? allDCs.find(d => d.id === id) : null;
 
+  // Auto-generate next DC number (numeric increment)
+  const generateNextDCNumber = () => {
+    const numericDCs = allDCs
+      .map(dc => Number(dc.dc_number))
+      .filter(n => !isNaN(n));
+
+    if (numericDCs.length === 0) return "001";
+
+    const max = Math.max(...numericDCs);
+    return String(max + 1).padStart(3, "0");
+  };
+
   const [generatedDate, setGeneratedDate] = useState<Date | undefined>(
-    existing ? new Date(existing.generated_date) : undefined
+    existing
+      ? new Date(existing.generated_date)
+      : new Date()
   );
   const [partyId, setPartyId] = useState(existing?.party_id || "");
-  const [dcNumber, setDcNumber] = useState(existing?.dc_number || "");
+  const [dcNumber, setDcNumber] = useState(
+    existing?.dc_number || (isEdit ? "" : generateNextDCNumber())
+  );
   const [transporterName, setTransporterName] = useState(existing?.transporter_name || "");
 
   const handlePartyChange = (val: string) => {
@@ -89,6 +105,19 @@ export default function DCForm() {
     if (!generatedDate) { toast({ title: "Date is required", variant: "destructive" }); return; }
     if (!partyId) { toast({ title: "Select a party", variant: "destructive" }); return; }
     if (!dcNumber.trim()) { toast({ title: "DC number is required", variant: "destructive" }); return; }
+
+    const duplicate = allDCs.find(
+      d => d.dc_number === dcNumber.trim() && d.id !== id
+    );
+
+    if (duplicate) {
+      toast({
+        title: "Duplicate DC number",
+        description: "DC number already exists.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     if (items.filter(i => i.dc_quantity > 0).length === 0) {
       toast({ title: "Enter at least one DC quantity", variant: "destructive" });

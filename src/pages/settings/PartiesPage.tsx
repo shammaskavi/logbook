@@ -3,6 +3,7 @@ import { useParties } from "@/hooks/use-parties";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import PartyFormModal from "@/components/settings/PartyFormModal";
+import { Pencil } from "lucide-react";
 
 export default function PartiesPage() {
     const { data: parties = [], isLoading } = useParties();
@@ -74,7 +75,7 @@ export default function PartiesPage() {
                                                 setModalOpen(true);
                                             }}
                                         >
-                                            Edit
+                                            <Pencil className="w-4 h-4" />
                                         </Button>
                                     </td>
                                 </tr>
