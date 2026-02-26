@@ -152,7 +152,7 @@ export function DCPreview({
             </div>
             <div className="text-center">
                 <div className="py-8 text-xs inline-block">
-                    Developed by VelocityOS Pvt. Ltd. | www.velocityos.in | 7698810804
+                    Developed by VelocityOS Pvt. Ltd | www.velocityos.in
                 </div>
             </div>
         </div>

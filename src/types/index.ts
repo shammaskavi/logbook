@@ -51,6 +51,41 @@ export interface DCItem {
   work_order_item_id: string;
   job_work_type_name: string;
   quantity: number;
+  invoiced_quantity?: number;
+  remaining_billable_quantity?: number;
+}
+
+export type InvoiceGSTType = "cgst_sgst" | "igst" | "none";
+
+export interface InvoiceItem {
+  id: string;
+  invoice_id: string;
+  dc_item_id: string;
+  work_order_id: string;
+  wo_number: string;
+  dc_number: string;
+  particulars: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+}
+
+export interface Invoice {
+  id: string;
+  invoice_number: string;
+  invoice_date: string;
+  party_id: string;
+  party_name: string;
+  party_gstin?: string | null;
+  gst_type: InvoiceGSTType;
+  cgst_percent: number;
+  sgst_percent: number;
+  igst_percent: number;
+  subtotal: number;
+  tax_amount: number;
+  grand_total: number;
+  created_at?: string;
+  items?: InvoiceItem[];
 }
 
 // Derived helpers

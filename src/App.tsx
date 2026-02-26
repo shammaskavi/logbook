@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import WorkOrderForm from "./pages/WorkOrderForm";
 import DCForm from "./pages/DCForm";
+import InvoicesPage from "./pages/InvoicesPage";
+import InvoiceForm from "./pages/InvoiceForm";
 import NotFound from "./pages/NotFound";
 import PartiesPage from "./pages/settings/PartiesPage";
 import JobWorksPage from "./pages/settings/JobWorksPage";
@@ -27,6 +29,8 @@ const App = () => (
             <Route path="/work-order/:id/edit" element={<WorkOrderForm />} />
             <Route path="/dc/new" element={<DCForm />} />
             <Route path="/dc/:id/edit" element={<DCForm />} />
+            <Route path="/invoices" element={<InvoicesPage />} />
+            <Route path="/invoices/new" element={<InvoiceForm />} />
             <Route path="/settings" element={<SettingsLayout />}>
               <Route path="parties" element={<PartiesPage />} />
               <Route path="job-works" element={<JobWorksPage />} />

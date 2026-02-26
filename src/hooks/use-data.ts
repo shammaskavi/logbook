@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { createWorkOrder, updateWorkOrder, deleteWorkOrderWithEffects } from "@/repositories/workOrders.repo";
 import { createDeliveryChallanWithEffects } from "@/repositories/deliveryChallans.repo";
+import { invoicesRepo, BillableDCItem, CreateInvoicePayload } from "@/repositories/invoices.repo";
 import { Party, JobWorkType, WorkOrder, WorkOrderItem, DeliveryChallan, DCItem } from "@/types";
 
 // ── Parties ──
@@ -154,6 +155,9 @@ export function useDeliveryChallans() {
             work_order_item_id: i.work_order_item_id,
             job_work_type_name: i.job_work_type_name,
             quantity: i.quantity,
+            invoiced_quantity: i.invoiced_quantity ?? 0,
+            remaining_billable_quantity:
+              i.quantity - (i.invoiced_quantity ?? 0),
           })),
         linked_work_order_ids: dc.linked_work_order_ids || [],
       }));
@@ -222,5 +226,72 @@ export function useDeleteDeliveryChallans() {
       if (error) throw error;
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["delivery_challans"] }),
+  });
+}
+
+// ── Invoices ──
+
+export function useBillableDCItems(partyId?: string) {
+  return useQuery({
+    queryKey: ["billable_dc_items", partyId],
+    queryFn: async (): Promise<BillableDCItem[]> => {
+      if (!partyId) return [];
+      return invoicesRepo.getBillableDCItems(partyId);
+    },
+    enabled: !!partyId,
+  });
+}
+
+export function useCreateInvoice() {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: CreateInvoicePayload) =>
+      invoicesRepo.createInvoice(payload),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["invoices"] });
+      qc.invalidateQueries({ queryKey: ["billable_dc_items"] });
+      qc.invalidateQueries({ queryKey: ["delivery_challans"] });
+    },
+  });
+}
+
+export function useInvoices() {
+  return useQuery({
+    queryKey: ["invoices"],
+    queryFn: async () => {
+      const invoices = await invoicesRepo.getInvoices();
+
+      return invoices.map((inv: any) => ({
+        ...inv,
+        items:
+          inv.items ||
+          inv.invoice_items ||
+          inv.invoiceItems ||
+          [],
+      }));
+    },
+  });
+}
+
+export function useInvoice(invoiceId?: string) {
+  return useQuery({
+    queryKey: ["invoice", invoiceId],
+    queryFn: async () => {
+      if (!invoiceId) throw new Error("Invoice ID required");
+
+      const invoice = await invoicesRepo.getInvoiceById(invoiceId);
+
+      // 🔥 Normalize data shape for UI
+      return {
+        ...invoice,
+        items:
+          invoice.items ||
+          invoice.invoice_items ||
+          invoice.invoiceItems ||
+          [],
+      };
+    },
+    enabled: !!invoiceId,
   });
 }

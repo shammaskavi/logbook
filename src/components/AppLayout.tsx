@@ -1,5 +1,5 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ClipboardList, Menu, Settings } from "lucide-react";
+import { ClipboardList, Menu, Settings, FileText } from "lucide-react";
 import Logo from "../assets/logo-light.png"
 
 
@@ -9,6 +9,7 @@ export default function AppLayout() {
 
   const navItems = [
     { icon: ClipboardList, label: "Work Orders", path: "/" },
+    { icon: FileText, label: "Invoices", path: "/invoices" },
     { icon: Settings, label: "Settings", path: "/settings/parties" },
   ];
 
@@ -24,7 +25,10 @@ export default function AppLayout() {
         </div>
 
         {navItems.map((item) => {
-          const active = location.pathname === item.path;
+          const active =
+            item.path === "/"
+              ? location.pathname === "/"
+              : location.pathname.startsWith(item.path);
           return (
             <button
               key={item.path}
