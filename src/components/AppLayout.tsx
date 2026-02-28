@@ -1,6 +1,7 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { ClipboardList, Menu, Settings, FileText, Layers2 } from "lucide-react";
-import Logo from "../assets/logo-light.png"
+import Logo from "../assets/logbook-logo.png";
+
 
 
 export default function AppLayout() {
@@ -21,7 +22,7 @@ export default function AppLayout() {
         {/* bg-sidebar-primary */}
         <div className="w-10 h-10 rounded-lg flex items-center justify-center mb-4">
           {/* <ClipboardList className="w-5 h-5 text-sidebar-primary-foreground" /> */}
-          <img src={Logo} alt="VelocityOS Logo" className="h-8 w-8" />
+          <img src={Logo} alt="VelocityOS Logo" className="h-8 w-8  rounded-lg" />
         </div>
 
         {navItems.map((item) => {
