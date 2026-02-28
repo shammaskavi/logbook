@@ -59,7 +59,6 @@ export function DCPreviewModal({ dcId, open, onClose }: DCPreviewModalProps) {
                     <div className="flex gap-2">
                         <Button
                             size="sm"
-                            className="bg-slate-900 hover:bg-slate-800 text-white h-9 px-3 md:px-4"
                             onClick={() => handlePrint()}
                         >
                             <Printer className="h-4 w-4 md:mr-2" />

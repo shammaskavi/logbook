@@ -38,7 +38,6 @@ export default function InvoicePreviewModal({
                     <div className="flex items-center gap-2">
                         <Button
                             size="sm"
-                            className="bg-slate-900 hover:bg-slate-800 h-9 px-3 md:px-4"
                             onClick={() => handlePrint()}
                             disabled={!invoice}
                         >

@@ -110,7 +110,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
                     <thead>
                         <tr
                             className="bg-slate-900 text-white"
-                            style={{ backgroundColor: '#0f172a', color: 'white', WebkitPrintColorAdjust: 'exact' }}
+                            style={{ backgroundColor: '#264F3D', color: 'white', WebkitPrintColorAdjust: 'exact' }}
                         >
                             <th className="px-3 py-1.5 text-left font-semibold first:rounded-l-sm">W.O / D.C</th>
                             <th className="px-3 py-1.5 text-left font-semibold">Particulars</th>

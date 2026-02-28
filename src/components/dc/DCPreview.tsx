@@ -99,7 +99,7 @@ export function DCPreview({
                     <thead>
                         <tr
                             className="bg-slate-900 text-white"
-                            style={{ backgroundColor: '#0f172a', color: 'white', WebkitPrintColorAdjust: 'exact' }}
+                            style={{ backgroundColor: '#264F3D', color: 'white', WebkitPrintColorAdjust: 'exact' }}
                         >
                             <th className="px-4 py-3 text-left font-semibold first:rounded-l-md">Work Order No.</th>
                             <th className="px-4 py-3 text-left font-semibold">Particulars / Job Description</th>
