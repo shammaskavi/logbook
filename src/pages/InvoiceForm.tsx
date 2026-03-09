@@ -19,6 +19,8 @@ export default function InvoiceForm() {
 
     const { data: parties = [] } = useParties();
 
+    const [step, setStep] = useState<1 | 2>(1);
+
     const [invoiceNumber, setInvoiceNumber] = useState("");
     const [invoiceDate, setInvoiceDate] = useState(format(new Date(), "yyyy-MM-dd"));
     const [partyId, setPartyId] = useState<string | undefined>();
@@ -58,16 +60,37 @@ export default function InvoiceForm() {
         }
     }, [invoiceNumber]);
 
-    const toggleRow = (id: string) => {
+    const toggleRow = (id: string, remaining: number) => {
         setRows(prev => ({
             ...prev,
             [id]: {
                 selected: !prev[id]?.selected,
-                quantity: prev[id]?.quantity ?? 0,
+                quantity: prev[id]?.quantity ?? remaining,
                 rate: prev[id]?.rate ?? 0,
             },
         }));
     };
+
+    // Robust "Select All" for Step 1
+    const toggleAllRows = (checked: boolean) => {
+        setRows(prev => {
+            const updated = { ...prev } as Record<string, { selected: boolean; quantity: number; rate: number }>;
+
+            billableItems.forEach((item: any) => {
+                updated[item.dc_item_id] = {
+                    selected: checked,
+                    quantity: prev[item.dc_item_id]?.quantity ?? item.remaining_qty,
+                    rate: prev[item.dc_item_id]?.rate ?? 0,
+                };
+            });
+
+            return updated;
+        });
+    };
+
+    const allSelected =
+        billableItems.length > 0 &&
+        billableItems.every((item: any) => rows[item.dc_item_id]?.selected);
 
     const updateQuantity = (id: string, qty: number, max: number) => {
         const safeQty = Math.min(qty, max);
@@ -174,10 +197,30 @@ export default function InvoiceForm() {
                     <p className="text-sm text-muted-foreground">Generate invoice from delivered work</p>
                 </div>
                 <div className="flex gap-2">
+
+                    {step === 2 && (
+                        <Button variant="outline" onClick={() => setStep(1)}>
+                            Back
+                        </Button>
+                    )}
+
+                    {step === 1 && (
+                        <Button
+                            onClick={() => setStep(2)}
+                            disabled={Object.values(rows).filter(r => r?.selected).length === 0}
+                        >
+                            Next
+                        </Button>
+                    )}
+
+                    {step === 2 && (
+                        <Button onClick={handleSubmit} disabled={createInvoiceMutation.isPending}>
+                            {createInvoiceMutation.isPending ? "Generating..." : "Generate Invoice"}
+                        </Button>
+                    )}
+
                     <Button variant="outline" onClick={() => navigate("/invoices")}>Cancel</Button>
-                    <Button onClick={handleSubmit} disabled={createInvoiceMutation.isPending}>
-                        {createInvoiceMutation.isPending ? "Generating..." : "Generate Invoice"}
-                    </Button>
+
                 </div>
             </div>
 
@@ -285,61 +328,120 @@ export default function InvoiceForm() {
                 ) : billableItems.length === 0 ? (
                     <p className="text-sm text-muted-foreground">No billable items available.</p>
                 ) : (
-                    <div className="space-y-4">
-                        {billableItems.map((item: any) => {
-                            const row = rows[item.dc_item_id] || { selected: false, quantity: 0, rate: 0 };
-                            const amount = row.quantity * row.rate;
+                    <div className="overflow-x-auto">
 
-                            return (
-                                <div key={item.dc_item_id} className="border rounded-md p-4 space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
+                        <table className="w-full text-sm table-fixed">
+
+                            <thead className="border-b">
+                                <tr className="text-left">
+
+                                    {step === 1 && (
+                                        <th className="py-3 w-10">
                                             <input
                                                 type="checkbox"
                                                 className="h-4 w-4 accent-primary"
-                                                checked={row.selected}
-                                                onChange={() => toggleRow(item.dc_item_id)}
+                                                checked={allSelected}
+                                                onChange={(e) => toggleAllRows(e.target.checked)}
                                             />
-                                            <div>
-                                                <p className="text-sm font-medium">WO {item.wo_number} · DC {item.dc_number}</p>
-                                                <p className="text-xs text-muted-foreground">{item.job_work_type_name}</p>
-                                            </div>
-                                        </div>
-                                        <span className="text-sm text-muted-foreground">Remaining: {item.remaining_qty}</span>
-                                    </div>
+                                        </th>
+                                    )}
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                        <div>
-                                            <Label className="text-xs text-muted-foreground">Quantity</Label>
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                max={item.remaining_qty}
-                                                value={row.quantity}
-                                                onChange={(e) => updateQuantity(item.dc_item_id, Number(e.target.value), item.remaining_qty)}
-                                            />
-                                        </div>
+                                    <th className="py-3 w-24">WO No.</th>
+                                    <th className="py-3 w-24">DC No.</th>
+                                    <th className="py-3">Item</th>
+                                    <th className="py-3 w-36">Remaining Qty.</th>
 
-                                        <div>
-                                            <Label className="text-xs text-muted-foreground">Rate</Label>
-                                            <Input
-                                                type="number"
-                                                min={0}
-                                                value={row.rate}
-                                                onChange={(e) => updateRate(item.dc_item_id, Number(e.target.value))}
-                                            />
-                                        </div>
+                                    {step === 2 && (
+                                        <>
+                                            <th className="py-3 w-36">Invoice Qty.</th>
+                                            <th className="py-3 w-32">Unit Rate</th>
+                                            <th className="py-3 w-40 text-right">Amount</th>
+                                        </>
+                                    )}
 
-                                        <div className="flex items-end">
-                                            <div className="w-full text-right">
-                                                <Label className="text-xs text-muted-foreground">Amount</Label>
-                                                <p className="text-sm font-medium">₹{amount.toFixed(2)}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
+                                </tr>
+                            </thead>
+
+                            <tbody>
+
+                                {billableItems
+                                    .filter((item: any) => step === 1 || rows[item.dc_item_id]?.selected)
+                                    .map((item: any) => {
+
+                                        const row = rows[item.dc_item_id] || {
+                                            selected: false,
+                                            quantity: item.remaining_qty,
+                                            rate: 0,
+                                        };
+
+                                        const amount = row.quantity * row.rate;
+
+                                        return (
+
+                                            <tr key={item.dc_item_id} className="border-b">
+
+                                                {step === 1 && (
+                                                    <td className="py-3">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="h-4 w-4 accent-primary"
+                                                            checked={row.selected}
+                                                            onChange={() => toggleRow(item.dc_item_id, item.remaining_qty)}
+                                                        />
+                                                    </td>
+                                                )}
+
+                                                <td className="py-3">{item.wo_number}</td>
+                                                <td className="py-3">{item.dc_number}</td>
+                                                <td className="py-3">{item.job_work_type_name}</td>
+                                                <td className="py-3 w-36">{item.remaining_qty}</td>
+
+                                                {step === 2 && (
+                                                    <>
+
+                                                        <td className="py-3 w-36">
+                                                            <Input
+                                                                type="number"
+                                                                min={0}
+                                                                max={item.remaining_qty}
+                                                                value={row.quantity}
+                                                                onChange={(e) =>
+                                                                    updateQuantity(
+                                                                        item.dc_item_id,
+                                                                        Number(e.target.value),
+                                                                        item.remaining_qty
+                                                                    )
+                                                                }
+                                                            />
+                                                        </td>
+
+                                                        <td className="py-3 w-32">
+                                                            <Input
+                                                                type="number"
+                                                                min={0}
+                                                                value={row.rate}
+                                                                onChange={(e) =>
+                                                                    updateRate(item.dc_item_id, Number(e.target.value))
+                                                                }
+                                                            />
+                                                        </td>
+
+                                                        <td className="py-3 w-40 text-right font-medium tabular-nums whitespace-nowrap">
+                                                            ₹{amount.toFixed(2)}
+                                                        </td>
+
+                                                    </>
+                                                )}
+
+                                            </tr>
+
+                                        );
+                                    })}
+
+                            </tbody>
+
+                        </table>
+
                     </div>
                 )}
             </div>

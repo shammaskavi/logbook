@@ -58,5 +58,17 @@ export async function deleteWorkOrderWithEffects(workOrderId: string) {
     }
   );
 
-  if (error) throw error;
+  if (!error) return;
+
+  // Translate DB foreign key errors into business-friendly message
+  if (
+    error.message?.includes("invoice_items_dc_item_id_fkey") ||
+    error.message?.includes("violates foreign key constraint")
+  ) {
+    throw new Error(
+      "Cannot delete this work order because invoices have already been generated for it."
+    );
+  }
+
+  throw new Error("Failed to delete work order.");
 }

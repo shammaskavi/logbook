@@ -107,6 +107,7 @@ export function useDeleteWorkOrder() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work_orders"] });
       qc.invalidateQueries({ queryKey: ["delivery_challans"] });
+      qc.invalidateQueries({ queryKey: ["invoices"] });
     },
   });
 }
@@ -122,6 +123,7 @@ export function useDeleteWorkOrders() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["work_orders"] });
       qc.invalidateQueries({ queryKey: ["delivery_challans"] });
+      qc.invalidateQueries({ queryKey: ["invoices"] });
     },
   });
 }
