@@ -55,7 +55,7 @@ export default function DCForm() {
 
   const handlePartyChange = (val: string) => {
     setPartyId(val);
-    setItems([]);
+    setRows({});
     setStep(1);
   };
 
@@ -67,37 +67,76 @@ export default function DCForm() {
     dc_quantity: number;
   };
 
-  const [items, setItems] = useState<DCFormItem[]>([]);
-  const [selectedWorkOrders, setSelectedWorkOrders] = useState<string[]>([]);
+  const [rows, setRows] = useState<Record<string, {
+    selected: boolean;
+    pending_quantity: number;
+    dc_quantity: number;
+    work_order_id: string;
+    work_order_item_id: string;
+    job_work_type_name: string;
+    wo_number?: string;
+  }>>({});
 
   const dueWorkOrders = workOrders.filter(
     wo => wo.party_id === partyId && wo.items.some(i => i.pending_quantity > 0)
   );
 
-  const toggleWorkOrder = (workOrderId: string) => {
-    setSelectedWorkOrders(prev =>
-      prev.includes(workOrderId)
-        ? prev.filter(id => id !== workOrderId)
-        : [...prev, workOrderId]
-    );
+  const selectableItems = dueWorkOrders.flatMap(wo =>
+    wo.items
+      .filter(i => i.pending_quantity > 0)
+      .map(i => ({
+        work_order_id: wo.id,
+        work_order_item_id: i.id,
+        job_work_type_name: i.job_work_type_name,
+        pending_quantity: i.pending_quantity,
+        wo_number: wo.work_order_number
+      }))
+  );
+
+  const toggleRow = (item: any) => {
+    setRows(prev => ({
+      ...prev,
+      [item.work_order_item_id]: {
+        selected: !prev[item.work_order_item_id]?.selected,
+        pending_quantity: item.pending_quantity,
+        dc_quantity: prev[item.work_order_item_id]?.dc_quantity ?? item.pending_quantity,
+        work_order_id: item.work_order_id,
+        work_order_item_id: item.work_order_item_id,
+        job_work_type_name: item.job_work_type_name,
+        wo_number: item.wo_number
+      }
+    }));
   };
 
-  const buildItemsFromSelection = () => {
-    const nextItems = dueWorkOrders
-      .filter(wo => selectedWorkOrders.includes(wo.id))
-      .flatMap(wo =>
-        wo.items
-          .filter(i => i.pending_quantity > 0)
-          .map(i => ({
-            work_order_id: wo.id,
-            work_order_item_id: i.id,
-            job_work_type_name: i.job_work_type_name,
-            pending_quantity: i.pending_quantity,
-            dc_quantity: 0,
-          }))
-      );
+  const toggleAllRows = (checked: boolean) => {
+    const updated: any = {};
 
-    setItems(nextItems);
+    selectableItems.forEach(item => {
+      updated[item.work_order_item_id] = {
+        selected: checked,
+        pending_quantity: item.pending_quantity,
+        dc_quantity: item.pending_quantity,
+        work_order_id: item.work_order_id,
+        work_order_item_id: item.work_order_item_id,
+        job_work_type_name: item.job_work_type_name,
+        wo_number: item.wo_number
+      };
+    });
+
+    setRows(updated);
+  };
+
+  const allSelected = selectableItems.length > 0 &&
+    selectableItems.every(item => rows[item.work_order_item_id]?.selected);
+
+  const buildItemsFromSelection = () => {
+    const selected = Object.values(rows).filter(r => r.selected);
+
+    if (selected.length === 0) {
+      toast({ title: "Select at least one item", variant: "destructive" });
+      return;
+    }
+
     setStep(2);
   };
 
@@ -119,7 +158,9 @@ export default function DCForm() {
       return;
     }
 
-    if (items.filter(i => i.dc_quantity > 0).length === 0) {
+    const selectedRows = Object.values(rows).filter(r => r.selected && r.dc_quantity > 0);
+
+    if (selectedRows.length === 0) {
       toast({ title: "Enter at least one DC quantity", variant: "destructive" });
       return;
     }
@@ -130,14 +171,12 @@ export default function DCForm() {
       party_id: partyId,
       party_name: parties.find(p => p.id === partyId)?.name || "",
       transporter_name: transporterName.trim(),
-      items: items
-        .filter(i => i.dc_quantity > 0)
-        .map(i => ({
-          work_order_id: i.work_order_id,
-          work_order_item_id: i.work_order_item_id,
-          job_work_type_name: i.job_work_type_name,
-          dc_quantity: i.dc_quantity,
-        })),
+      items: selectedRows.map(i => ({
+        work_order_id: i.work_order_id,
+        work_order_item_id: i.work_order_item_id,
+        job_work_type_name: i.job_work_type_name,
+        dc_quantity: i.dc_quantity,
+      })),
     };
 
     try {
@@ -165,7 +204,7 @@ export default function DCForm() {
           {step === 1 ? (
             <Button
               onClick={buildItemsFromSelection}
-              disabled={selectedWorkOrders.length === 0}
+              disabled={Object.values(rows).filter(r => r.selected).length === 0}
             >
               Next
             </Button>
@@ -218,44 +257,77 @@ export default function DCForm() {
       {step === 1 && (
         <div className="bg-card rounded-lg border border-border overflow-hidden">
           <div className="px-6 py-4 border-b border-border font-medium">
-            Select Work Orders
+            Select Work Order Items
           </div>
 
-          <div className="divide-y">
-            {dueWorkOrders.map(wo => {
-              const selected = selectedWorkOrders.includes(wo.id);
-              return (
-                <div key={wo.id} className={selected ? "bg-muted" : ""}>
-                  <div className="flex flex-col gap-3 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="space-x-4">
-                      <span className="font-medium">{wo.work_order_number}</span>
-                      <span className="text-sm text-muted-foreground">
-                        Pending: {wo.items.reduce((s, i) => s + i.pending_quantity, 0)}
-                      </span>
-                    </div>
+          {/* Party not selected */}
+          {!partyId && (
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              Select a party to view pending work order items
+            </div>
+          )}
 
-                    <input
-                      type="checkbox"
-                      className="self-start sm:self-auto"
-                      checked={selected}
-                      onChange={() => toggleWorkOrder(wo.id)}
-                    />
-                  </div>
+          {/* Party selected but no items */}
+          {partyId && selectableItems.length === 0 && (
+            <div className="py-16 text-center text-sm text-muted-foreground">
+              No pending work order items available for this party
+            </div>
+          )}
 
-                  {selected && (
-                    <div className="px-6 pb-4 text-sm text-muted-foreground">
-                      {wo.items.map(i => (
-                        <div key={i.id} className="flex justify-between">
-                          <span>{i.job_work_type_name}</span>
-                          <span>Pending: {i.pending_quantity}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
+          {/* Table when items exist */}
+          {partyId && selectableItems.length > 0 && (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm table-fixed">
+                <thead className="bg-muted/50 border-b">
+                  <tr className="text-xs uppercase tracking-wide text-muted-foreground">
+                    <th className="w-12 text-center py-3">
+                      <input
+                        type="checkbox"
+                        checked={allSelected}
+                        onChange={e => toggleAllRows(e.target.checked)}
+                      />
+                    </th>
+                    <th className="w-28 text-left py-3">WO</th>
+                    <th className="text-left py-3">Item</th>
+                    <th className="w-32 text-right pr-6 py-3">Pending</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {selectableItems.map((item, index) => {
+                    const row = rows[item.work_order_item_id];
+
+                    return (
+                      <tr
+                        key={item.work_order_item_id}
+                        className={`border-b transition-colors hover:bg-muted/40 ${index % 2 === 0 ? "bg-background" : "bg-muted/20"}`}
+                      >
+                        <td className="text-center py-3">
+                          <input
+                            type="checkbox"
+                            checked={row?.selected || false}
+                            onChange={() => toggleRow(item)}
+                          />
+                        </td>
+
+                        <td className="font-medium py-3">
+                          {item.wo_number}
+                        </td>
+
+                        <td className="py-3">
+                          {item.job_work_type_name}
+                        </td>
+
+                        <td className="text-right pr-6 tabular-nums font-medium py-3">
+                          {item.pending_quantity}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
 
@@ -267,40 +339,44 @@ export default function DCForm() {
             <div>DC Qty</div>
           </div>
 
-          {items.map((item, idx) => (
-            <div
-              key={item.work_order_item_id}
-              className="flex flex-col gap-3 px-6 py-4 border-t md:grid md:grid-cols-[1fr_150px_150px] md:items-center md:gap-0"
-            >
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground md:hidden">Job Work</span>
-                <div>{item.job_work_type_name}</div>
-              </div>
+          {Object.values(rows)
+            .filter(r => r.selected)
+            .map((item, idx) => (
+              <div
+                key={item.work_order_item_id}
+                className="flex flex-col gap-3 px-6 py-4 border-t md:grid md:grid-cols-[1fr_150px_150px] md:items-center md:gap-0"
+              >
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground md:hidden">Job Work</span>
+                  <div>{item.job_work_type_name}</div>
+                </div>
 
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground md:hidden">Pending</span>
-                <div>{item.pending_quantity}</div>
-              </div>
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground md:hidden">Pending</span>
+                  <div>{item.pending_quantity}</div>
+                </div>
 
-              <div className="flex flex-col gap-1">
-                <span className="text-xs text-muted-foreground md:hidden">DC Quantity</span>
-                <Input
-                  type="number"
-                  min={1}
-                  max={item.pending_quantity}
-                  value={item.dc_quantity || ""}
-                  onChange={e =>
-                    setItems(items.map((it, i) =>
-                      i === idx
-                        ? { ...it, dc_quantity: Number(e.target.value) || 0 }
-                        : it
-                    ))
-                  }
-                  className="w-full md:w-32"
-                />
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground md:hidden">DC Quantity</span>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={item.pending_quantity}
+                    value={item.dc_quantity || ""}
+                    onChange={e =>
+                      setRows(prev => ({
+                        ...prev,
+                        [item.work_order_item_id]: {
+                          ...item,
+                          dc_quantity: Number(e.target.value) || 0
+                        }
+                      }))
+                    }
+                    className="w-full md:w-32"
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
     </div>
