@@ -1,5 +1,6 @@
 import React from "react";
 import { format } from "date-fns";
+import { useBusinessSettings } from "@/hooks/use-data";
 
 type DCItem = {
     work_order_number: string;
@@ -33,6 +34,8 @@ export function DCPreview({
     noOfBundles,
     items,
 }: DCPreviewProps) {
+    const { data: businessSettings } = useBusinessSettings();
+
     const totalQuantity = items.reduce(
         (sum, item) => sum + Number(item.quantity || 0),
         0
@@ -42,7 +45,18 @@ export function DCPreview({
         ? format(new Date(dcDate), "dd MMM yyyy")
         : "-";
 
-    const primaryPhone = businessPhones.length > 0 ? businessPhones[0] : "-";
+    const resolvedBusinessName =
+        businessSettings?.business_name || businessName || "AAMIR JAMAL";
+
+    const resolvedBusinessAddress =
+        businessSettings?.business_address || businessAddress || "";
+
+    const resolvedBusinessGSTIN =
+        businessSettings?.gstin || businessGSTIN || "";
+
+    const primaryPhone =
+        businessSettings?.phone ||
+        (businessPhones.length > 0 ? businessPhones[0] : "-");
 
     // Half A4 height so two copies fit on one A4 page.
     const copyHeight = "148.5mm";
@@ -77,17 +91,17 @@ export function DCPreview({
 
                     <div className="p-2">
                         <div className="text-sm font-bold uppercase text-[#8B1E14] leading-tight">
-                            {businessName}
+                            {resolvedBusinessName}
                         </div>
                         <div className="text-[8px] text-slate-700 leading-tight mt-0.5">
-                            {businessAddress}
+                            {resolvedBusinessAddress}
                         </div>
                     </div>
 
                     <div className="border-l border-[#8B1E14] text-[8px]">
-                        {businessGSTIN && (
+                        {resolvedBusinessGSTIN && (
                             <div className="px-2 py-1 border-b border-[#8B1E14]">
-                                <span className="font-semibold">GSTIN:</span> {businessGSTIN}
+                                <span className="font-semibold">GSTIN:</span> {resolvedBusinessGSTIN}
                             </div>
                         )}
                         <div className="px-2 py-1">
@@ -189,7 +203,7 @@ export function DCPreview({
                     <div className="text-left uppercase">Receiver's Signature</div>
                     <div className="text-center text-slate-400">Job Work Only</div>
                     <div className="text-right uppercase font-semibold">
-                        For {businessName}
+                        For {resolvedBusinessName}
                     </div>
                 </div>
             </div>

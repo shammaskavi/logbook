@@ -62,10 +62,7 @@ export default function JobWorkFormModal({
 
         try {
             if (mode === "create") {
-                await createJobWork({
-                    name,
-                    active,
-                });
+                await createJobWork(name);
                 toast.success("Job Work created successfully");
             } else if (mode === "edit" && initialData) {
                 await updateJobWork({
@@ -80,10 +77,17 @@ export default function JobWorkFormModal({
 
             onClose();
         } catch (err: any) {
-            if (err?.message?.includes("job_work_types_name_key")) {
+            console.error("Job Work save error:", err);
+
+            if (
+                err?.message?.includes("job_work_types_name_key") ||
+                err?.message?.includes(
+                    "job_work_types_organization_id_name_key"
+                )
+            ) {
                 toast.error("Job Work name already exists");
             } else {
-                toast.error("Something went wrong");
+                toast.error(err?.message || "Something went wrong");
             }
         }
     };

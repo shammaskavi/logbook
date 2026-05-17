@@ -67,7 +67,35 @@ export default function InvoicesPage() {
                                             {invoice.party_name}
                                         </td>
                                         <td className="px-4 py-3 text-right font-semibold">
-                                            ₹{Number(invoice.grand_total || 0).toFixed(2)}
+                                            ₹{(() => {
+                                                const storedTotal = Number(
+                                                    invoice.grand_total ??
+                                                    invoice.total_amount ??
+                                                    invoice.amount ??
+                                                    invoice.total ??
+                                                    0
+                                                );
+
+                                                // If the stored total is valid and greater than zero, use it.
+                                                if (storedTotal > 0) {
+                                                    return storedTotal.toFixed(2);
+                                                }
+
+                                                // Otherwise, calculate the total from invoice items.
+                                                const calculatedTotal = (invoice.items || []).reduce(
+                                                    (sum: number, item: any) => {
+                                                        const lineAmount = Number(
+                                                            item.amount ??
+                                                            (Number(item.quantity || 0) * Number(item.rate || 0))
+                                                        );
+
+                                                        return sum + lineAmount;
+                                                    },
+                                                    0
+                                                );
+
+                                                return calculatedTotal.toFixed(2);
+                                            })()}
                                         </td>
                                         <td className="px-4 py-3 text-right">
                                             <Button

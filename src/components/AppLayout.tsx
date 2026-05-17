@@ -1,18 +1,47 @@
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ClipboardList, Menu, Settings, FileText, Layers2 } from "lucide-react";
+import {
+  Menu,
+  Settings,
+  FileText,
+  Layers2,
+  LogOut,
+} from "lucide-react";
 import Logo from "../assets/logbook-logo.png";
+import { useAuth } from "@/context/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 
 
 export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
+  const { toast } = useToast();
 
   const navItems = [
     { icon: Layers2, label: "Work Orders", path: "/" },
     { icon: FileText, label: "Invoices", path: "/invoices" },
     { icon: Settings, label: "Settings", path: "/settings/parties" },
   ];
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+
+      navigate("/login", { replace: true });
+    } catch (error: any) {
+      toast({
+        title: "Sign out failed",
+        description: error?.message || "Unable to sign out.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -47,8 +76,12 @@ export default function AppLayout() {
 
         <div className="flex-1" />
 
-        <button className="w-10 h-10 rounded-lg flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent transition-colors">
-          <Menu className="w-5 h-5" />
+        <button
+          onClick={handleLogout}
+          className="w-10 h-10 rounded-lg flex items-center justify-center text-sidebar-foreground hover:bg-sidebar-accent transition-colors"
+          title="Sign Out"
+        >
+          <LogOut className="w-5 h-5" />
         </button>
 
 

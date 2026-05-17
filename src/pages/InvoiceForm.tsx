@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { useToast } from "@/components/ui/use-toast";
-import { useParties } from "@/hooks/use-parties";
+import { useParties } from "@/hooks/use-data";
 import { useBillableDCItems, useCreateInvoice } from "@/hooks/use-data";
 import type { InvoiceGSTType } from "@/types";
 

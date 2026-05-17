@@ -1,5 +1,3 @@
-
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface BillableDCItem {
@@ -38,10 +36,16 @@ export interface CreateInvoicePayload {
 }
 
 export const invoicesRepo = {
-    async getBillableDCItems(partyId: string): Promise<BillableDCItem[]> {
+    async getBillableDCItems(
+        partyId: string,
+        organizationId: string
+    ): Promise<BillableDCItem[]> {
         const { data, error } = await supabase.rpc(
             "get_billable_dc_items",
-            { p_party_id: partyId }
+            {
+                p_organization_id: organizationId,
+                p_party_id: partyId,
+            }
         );
 
         if (error) throw error;
@@ -49,10 +53,14 @@ export const invoicesRepo = {
         return (data ?? []) as BillableDCItem[];
     },
 
-    async createInvoice(payload: CreateInvoicePayload): Promise<string> {
+    async createInvoice(
+        payload: CreateInvoicePayload,
+        organizationId: string
+    ): Promise<string> {
         const { data, error } = await supabase.rpc(
             "create_invoice_with_effects",
             {
+                p_organization_id: organizationId,
                 p_invoice_number: payload.invoice_number,
                 p_invoice_date: payload.invoice_date,
                 p_party_id: payload.party_id,
@@ -71,10 +79,11 @@ export const invoicesRepo = {
         return data as string;
     },
 
-    async getInvoices() {
+    async getInvoices(organizationId: string) {
         const { data, error } = await supabase
             .from("invoices")
             .select("*")
+            .eq("organization_id", organizationId)
             .order("created_at", { ascending: false });
 
         if (error) throw error;
@@ -82,11 +91,15 @@ export const invoicesRepo = {
         return data ?? [];
     },
 
-    async getInvoiceById(invoiceId: string) {
+    async getInvoiceById(
+        invoiceId: string,
+        organizationId: string
+    ) {
         const { data: invoice, error: invoiceError } = await supabase
             .from("invoices")
             .select("*")
             .eq("id", invoiceId)
+            .eq("organization_id", organizationId)
             .single();
 
         if (invoiceError) throw invoiceError;
@@ -94,7 +107,8 @@ export const invoicesRepo = {
         const { data: items, error: itemsError } = await (supabase as any)
             .from("invoice_items")
             .select("*")
-            .eq("invoice_id", invoiceId);
+            .eq("invoice_id", invoiceId)
+            .eq("organization_id", organizationId);
 
         if (itemsError) throw itemsError;
 

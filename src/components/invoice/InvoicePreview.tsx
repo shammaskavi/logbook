@@ -1,4 +1,5 @@
 import { format } from "date-fns";
+import { useBusinessSettings } from "@/hooks/use-data";
 
 interface InvoicePreviewProps {
     invoice: any;
@@ -6,6 +7,8 @@ interface InvoicePreviewProps {
 
 export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
     if (!invoice) return null;
+
+    const { data: businessSettings } = useBusinessSettings();
 
     const items = Array.isArray(invoice.items) ? invoice.items : [];
 
@@ -101,13 +104,41 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
             ? invoice.amount_in_words
             : numberToWords(grandTotal);
 
-    const businessName = invoice.businessName || "AAMIR JAMAL";
+    const businessName =
+        businessSettings?.business_name ||
+        invoice.businessName ||
+        "AAMIR JAMAL";
+
     const businessAddress =
+        businessSettings?.business_address ||
         invoice.businessAddress ||
         "#18/2, 2nd Cross, Vinayaka Nagar Extn, Old Guddadahalli, Bangalore 560026, Karnataka, India";
-    const businessPAN = invoice.businessPAN || "AMXPJ3615P";
+
+    const businessPAN =
+        businessSettings?.pan ||
+        invoice.businessPAN ||
+        "AMXPJ3615P";
+
     const businessPhone =
-        invoice.businessPhones || invoice.businessPhone || "+91 98453 43015";
+        businessSettings?.phone ||
+        invoice.businessPhones ||
+        invoice.businessPhone ||
+        "+91 98453 43015";
+
+    const bankAccountName =
+        businessSettings?.account_name || businessName;
+
+    const bankAccountNumber =
+        businessSettings?.account_number || "";
+
+    const bankIfscCode =
+        businessSettings?.ifsc_code || "";
+
+    const bankBranch =
+        businessSettings?.bank_branch || "";
+
+    const bankName =
+        businessSettings?.bank_name || "";
 
     const displayInvoiceNo =
         invoice.invoice_number || invoice.invoiceNumber || "-";
@@ -307,19 +338,19 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
                 <div className="border-t border-b border-[#8B1E14] px-2 py-2 text-[9px] leading-relaxed">
                     <span className="font-bold mr-4">Bank Details</span>
                     <span className="mr-4">
-                        <span className="font-semibold">A/C Name:</span> {businessName}
+                        <span className="font-semibold">A/C Name:</span> {bankAccountName}
                     </span>
                     <span className="mr-4">
-                        <span className="font-semibold">A/C No:</span> 35458273438546
+                        <span className="font-semibold">A/C No:</span> {bankAccountNumber || "-"}
                     </span>
                     <span className="mr-4">
-                        <span className="font-semibold">IFSC Code:</span> KKBK0008047
+                        <span className="font-semibold">IFSC Code:</span> {bankIfscCode || "-"}
                     </span>
                     <span className="mr-4">
-                        <span className="font-semibold">Branch:</span> Avenue Road
+                        <span className="font-semibold">Branch:</span> {bankBranch || "-"}
                     </span>
                     <span>
-                        <span className="font-semibold">Bank:</span> Kotak Mahindra Bank
+                        <span className="font-semibold">Bank:</span> {bankName || "-"}
                     </span>
                 </div>
 

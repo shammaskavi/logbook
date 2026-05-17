@@ -16,10 +16,14 @@ type CreateDCInput = {
     items: DCItemInput[];
 };
 
-export async function createDeliveryChallanWithEffects(input: CreateDCInput) {
+export async function createDeliveryChallanWithEffects(
+    input: CreateDCInput,
+    organizationId: string
+) {
     const { data, error } = await supabase.rpc(
         "create_delivery_challan_with_effects",
         {
+            p_organization_id: organizationId,
             p_dc_number: input.dc_number,
             p_generated_date: input.generated_date,
             p_party_id: input.party_id,

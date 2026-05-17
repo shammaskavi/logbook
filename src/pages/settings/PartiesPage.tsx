@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParties } from "@/hooks/use-parties";
+import { useParties } from "@/hooks/use-data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import PartyFormModal from "@/components/settings/PartyFormModal";

@@ -10,7 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useCreateParty, useUpdateParty } from "@/hooks/use-parties";
+import { useAddParty } from "@/hooks/use-data";
+import { useUpdateParty } from "@/hooks/use-parties";
 
 interface PartyFormModalProps {
     open: boolean;
@@ -32,7 +33,7 @@ export default function PartyFormModal({
     initialData,
     onSuccess,
 }: PartyFormModalProps) {
-    const { mutateAsync: createParty, isPending: creating } = useCreateParty();
+    const { mutateAsync: createParty, isPending: creating } = useAddParty();
     const { mutateAsync: updateParty, isPending: updating } = useUpdateParty();
 
     const isSubmitting = creating || updating;
