@@ -4,6 +4,7 @@ import {
   Settings,
   FileText,
   Layers2,
+  LayoutDashboard,
   LogOut,
 } from "lucide-react";
 import Logo from "../assets/logbook-logo.png";
@@ -21,6 +22,7 @@ export default function AppLayout() {
   const navItems = [
     { icon: Layers2, label: "Work Orders", path: "/" },
     { icon: FileText, label: "Invoices", path: "/invoices" },
+    { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Settings, label: "Settings", path: "/settings/parties" },
   ];
 
