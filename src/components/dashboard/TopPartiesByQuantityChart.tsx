@@ -1,5 +1,4 @@
 
-
 import {
     Card,
     CardContent,
@@ -18,6 +17,8 @@ import {
     Tooltip,
     ResponsiveContainer,
 } from "recharts";
+
+const BRAND_AMBER = "hsl(43, 80%, 45%)";
 
 function ChartSkeleton() {
     return (
@@ -70,9 +71,9 @@ export default function TopPartiesByQuantityChart() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                        No party data available yet.
-                    </p>
+                    <div className="h-[320px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No party data available yet.</p>
+                    </div>
                 </CardContent>
             </Card>
         );
@@ -95,32 +96,41 @@ export default function TopPartiesByQuantityChart() {
                             layout="vertical"
                             margin={{ top: 8, right: 16, left: 24, bottom: 8 }}
                         >
-                            <CartesianGrid strokeDasharray="3 3" />
+                            <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="hsl(40, 10%, 88%)" />
 
                             <XAxis
                                 type="number"
-                                tick={{ fontSize: 12 }}
+                                tick={{ fontSize: 12, fill: "hsl(150, 5%, 45%)" }}
+                                axisLine={false}
+                                tickLine={false}
                             />
 
                             <YAxis
                                 type="category"
                                 dataKey="party_name"
                                 width={140}
-                                tick={{ fontSize: 12 }}
+                                tick={{ fontSize: 12, fill: "hsl(150, 5%, 45%)" }}
+                                axisLine={false}
+                                tickLine={false}
                             />
 
                             <Tooltip
+                                contentStyle={{
+                                    background: "hsl(0, 0%, 100%)",
+                                    border: "1px solid hsl(40, 10%, 88%)",
+                                    borderRadius: "8px",
+                                    fontSize: 13,
+                                    boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                                }}
                                 formatter={(value: number) => [
-                                    new Intl.NumberFormat("en-IN").format(
-                                        value
-                                    ),
+                                    new Intl.NumberFormat("en-IN").format(value),
                                     "Quantity",
                                 ]}
                             />
 
                             <Bar
                                 dataKey="total_quantity"
-                                fill="currentColor"
+                                fill={BRAND_AMBER}
                                 radius={[0, 6, 6, 0]}
                             />
                         </BarChart>
