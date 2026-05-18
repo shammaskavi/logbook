@@ -19,8 +19,22 @@ import { AuthProvider } from "@/context/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
+import PartyLedgerPage from "./pages/PartyLedgerPage";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60 * 1000,
+      gcTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      refetchOnReconnect: true,
+      retry: 1,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+});
 
 const App = () => (
   <AuthProvider>
@@ -36,6 +50,7 @@ const App = () => (
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
                 <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/parties/:id/ledger" element={<PartyLedgerPage />} />
                 <Route path="/work-order/new" element={<WorkOrderForm />} />
                 <Route path="/work-order/:id/edit" element={<WorkOrderForm />} />
                 <Route path="/dc/new" element={<DCForm />} />

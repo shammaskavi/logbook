@@ -1,13 +1,23 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useParties } from "@/hooks/use-data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import PartyFormModal from "@/components/settings/PartyFormModal";
-import { Pencil, Users, Plus, Search, Phone, Hash } from "lucide-react";
+import {
+    Pencil,
+    Users,
+    Plus,
+    Search,
+    Phone,
+    Hash,
+    FileText,
+} from "lucide-react";
 
 export default function PartiesPage() {
     const { data: parties = [], isLoading } = useParties();
+    const navigate = useNavigate();
     const [search, setSearch] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
     const [mode, setMode] = useState<"create" | "edit">("create");
@@ -19,6 +29,10 @@ export default function PartiesPage() {
 
     const openCreate = () => { setMode("create"); setSelectedParty(null); setModalOpen(true); };
     const openEdit = (party: any) => { setMode("edit"); setSelectedParty(party); setModalOpen(true); };
+
+    const openLedger = (party: any) => {
+        navigate(`/parties/${party.id}/ledger`);
+    };
 
     return (
         <div className="space-y-4">
@@ -126,15 +140,27 @@ export default function PartiesPage() {
                                             )}
                                         </div>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-9 w-9 p-0 shrink-0 ml-3"
-                                        onClick={() => openEdit(party)}
-                                    >
-                                        <Pencil className="w-4 h-4" />
-                                        <span className="sr-only">Edit {party.name}</span>
-                                    </Button>
+                                    <div className="flex items-center gap-1 shrink-0 ml-3">
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-9 w-9 p-0"
+                                            onClick={() => openLedger(party)}
+                                        >
+                                            <FileText className="w-4 h-4" />
+                                            <span className="sr-only">View ledger for {party.name}</span>
+                                        </Button>
+
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="h-9 w-9 p-0"
+                                            onClick={() => openEdit(party)}
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                            <span className="sr-only">Edit {party.name}</span>
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         ))}
@@ -162,15 +188,29 @@ export default function PartiesPage() {
                                             {party.gstin || <span className="text-muted-foreground/40 font-sans text-sm">—</span>}
                                         </td>
                                         <td className="px-4 py-3">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                className="h-8 w-8 p-0"
-                                                onClick={() => openEdit(party)}
-                                            >
-                                                <Pencil className="w-3.5 h-3.5" />
-                                                <span className="sr-only">Edit {party.name}</span>
-                                            </Button>
+                                            <div className="flex items-center gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0"
+                                                    onClick={() => openLedger(party)}
+                                                >
+                                                    <FileText className="w-3.5 h-3.5" />
+                                                    <span className="sr-only">
+                                                        View ledger for {party.name}
+                                                    </span>
+                                                </Button>
+
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0"
+                                                    onClick={() => openEdit(party)}
+                                                >
+                                                    <Pencil className="w-3.5 h-3.5" />
+                                                    <span className="sr-only">Edit {party.name}</span>
+                                                </Button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
