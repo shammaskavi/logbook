@@ -127,7 +127,7 @@ export default function BusinessSettingsPage() {
     return (
         <form
             onSubmit={form.handleSubmit(onSubmit)}
-            className="bg-card rounded-lg border border-border p-6 space-y-8 max-w-6xl"
+            className="bg-card rounded-lg border border-border p-4 md:p-6 space-y-8 max-w-6xl"
         >
             <Section
                 title="Company Information"
