@@ -20,6 +20,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { useDeliveryChallans, useDeleteDeliveryChallan, useDeleteDeliveryChallans, useParties } from "@/hooks/use-data";
 import { useToast } from "@/hooks/use-toast";
 import { DCPreviewModal } from "@/components/dc/DCPreviewModal";
+import ConfirmDialog from "./ConfirmDialog";
+
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
@@ -34,6 +36,13 @@ export default function DCList() {
   const [previewDcId, setPreviewDcId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [filterSheetOpen, setFilterSheetOpen] = useState(false);
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean;
+    ids: string[];
+  }>({
+    open: false,
+    ids: [],
+  });
 
   const { data: dcs = [], isLoading } = useDeliveryChallans();
   const { data: parties = [] } = useParties();
@@ -71,17 +80,51 @@ export default function DCList() {
   };
 
   const handleDelete = useCallback((id: string) => {
-    deleteDC.mutate(id, { onSuccess: () => toast({ title: "DC deleted" }) });
-  }, [deleteDC, toast]);
+    setConfirmState({ open: true, ids: [id] });
+  }, []);
 
   const handleBulkDelete = () => {
-    const ids = Array.from(selectedIds);
-    deleteDCs.mutate(ids, {
-      onSuccess: () => {
-        setSelectedIds(new Set());
-        toast({ title: `${ids.length} DCs deleted` });
-      },
+    setConfirmState({
+      open: true,
+      ids: Array.from(selectedIds),
     });
+  };
+
+  const confirmDeletion = () => {
+    const ids = confirmState.ids;
+
+    if (ids.length === 1) {
+      deleteDC.mutate(ids[0], {
+        onSuccess: () => {
+          toast({ title: "Delivery Challan deleted successfully" });
+        },
+        onError: (err: any) => {
+          toast({
+            title: "Delete failed",
+            description: err?.message || "Failed to delete delivery challan.",
+            variant: "destructive",
+          });
+        },
+      });
+    } else {
+      deleteDCs.mutate(ids, {
+        onSuccess: () => {
+          setSelectedIds(new Set());
+          toast({
+            title: `${ids.length} delivery challan${ids.length > 1 ? "s" : ""} deleted successfully`,
+          });
+        },
+        onError: (err: any) => {
+          toast({
+            title: "Bulk delete failed",
+            description: err?.message || "Failed to delete selected delivery challans.",
+            variant: "destructive",
+          });
+        },
+      });
+    }
+
+    setConfirmState({ open: false, ids: [] });
   };
 
   const openPreview = (id: string) => {
@@ -159,7 +202,13 @@ export default function DCList() {
         </div>
 
         {selectedIds.size > 0 && (
-          <Button variant="destructive" size="sm" onClick={handleBulkDelete} className="shrink-0">
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={handleBulkDelete}
+            className="shrink-0"
+            disabled={deleteDC.isPending || deleteDCs.isPending}
+          >
             <Trash2 className="w-4 h-4 md:mr-1" />
             <span className="hidden md:inline">Delete ({selectedIds.size})</span>
             <span className="md:hidden">({selectedIds.size})</span>
@@ -356,6 +405,19 @@ export default function DCList() {
         dcId={previewDcId}
         open={previewOpen}
         onClose={() => { setPreviewOpen(false); setPreviewDcId(null); }}
+      />
+      <ConfirmDialog
+        open={confirmState.open}
+        title="Delete Delivery Challan?"
+        description={
+          confirmState.ids.length === 1
+            ? "Deleting this Delivery Challan will restore quantities to the linked Work Order. If this challan has already been invoiced, deletion will be blocked. This action cannot be undone."
+            : `Deleting ${confirmState.ids.length} Delivery Challans will restore quantities to their linked Work Orders. Any invoiced challans will be skipped with an error. This action cannot be undone.`
+        }
+        confirmLabel="Delete"
+        destructive
+        onConfirm={confirmDeletion}
+        onCancel={() => setConfirmState({ open: false, ids: [] })}
       />
     </>
   );
