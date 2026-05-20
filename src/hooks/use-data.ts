@@ -1,7 +1,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { createWorkOrder, updateWorkOrder, deleteWorkOrderWithEffects } from "@/repositories/workOrders.repo";
-import { createDeliveryChallanWithEffects } from "@/repositories/deliveryChallans.repo";
+import {
+  createDeliveryChallanWithEffects,
+  deleteDeliveryChallanWithEffects,
+} from "@/repositories/deliveryChallans.repo";
 import { invoicesRepo, BillableDCItem, CreateInvoicePayload } from "@/repositories/invoices.repo";
 import {
   Party,
@@ -368,13 +371,23 @@ export function useUpdateDeliveryChallan() {
 export function useDeleteDeliveryChallan() {
   const qc = useQueryClient();
   const { organizationId } = useCurrentOrganization();
+
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase.from("delivery_challans").delete().eq("id", id);
-      if (error) throw error;
-    },
+    mutationFn: (id: string) =>
+      deleteDeliveryChallanWithEffects(id),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["delivery_challans", organizationId] });
+      qc.invalidateQueries({
+        queryKey: ["delivery_challans", organizationId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["work_orders", organizationId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["invoices", organizationId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["dashboard", organizationId],
+      });
     },
   });
 }
@@ -382,13 +395,26 @@ export function useDeleteDeliveryChallan() {
 export function useDeleteDeliveryChallans() {
   const qc = useQueryClient();
   const { organizationId } = useCurrentOrganization();
+
   return useMutation({
     mutationFn: async (ids: string[]) => {
-      const { error } = await supabase.from("delivery_challans").delete().in("id", ids);
-      if (error) throw error;
+      for (const id of ids) {
+        await deleteDeliveryChallanWithEffects(id);
+      }
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["delivery_challans", organizationId] });
+      qc.invalidateQueries({
+        queryKey: ["delivery_challans", organizationId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["work_orders", organizationId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["invoices", organizationId],
+      });
+      qc.invalidateQueries({
+        queryKey: ["dashboard", organizationId],
+      });
     },
   });
 }

@@ -41,3 +41,16 @@ export async function createDeliveryChallanWithEffects(
     if (error) throw error;
     return data; // returns dc_id
 }
+
+export async function deleteDeliveryChallanWithEffects(dcId: string) {
+    const { data, error } = await supabase.rpc(
+        "delete_delivery_challan_with_effects",
+        {
+            p_dc_id: dcId,
+        }
+    );
+
+    if (error) throw error;
+    return data;
+}
+

@@ -73,10 +73,10 @@ function PageSkeleton() {
 type Tab = "overview" | "work-orders" | "delivery-challans" | "invoices";
 
 const TABS: { value: Tab; label: string }[] = [
-    { value: "overview",           label: "Overview" },
-    { value: "work-orders",        label: "Work Orders" },
-    { value: "delivery-challans",  label: "Challans" },
-    { value: "invoices",           label: "Invoices" },
+    { value: "overview", label: "Overview" },
+    { value: "work-orders", label: "Work Orders" },
+    { value: "delivery-challans", label: "Challans" },
+    { value: "invoices", label: "Invoices" },
 ];
 
 // ── Page ─────────────────────────────────────────────────────────────────────
@@ -86,14 +86,14 @@ export default function PartyLedgerPage() {
     const [activeTab, setActiveTab] = useState<Tab>("overview");
 
     const { data: parties = [] } = useParties();
-    const { data: workOrders = [],        isLoading: workOrdersLoading }    = useWorkOrders();
-    const { data: deliveryChallans = [],  isLoading: deliveryChallansLoading } = useDeliveryChallans();
-    const { data: invoices = [],          isLoading: invoicesLoading }       = useInvoices();
+    const { data: workOrders = [], isLoading: workOrdersLoading } = useWorkOrders();
+    const { data: deliveryChallans = [], isLoading: deliveryChallansLoading } = useDeliveryChallans();
+    const { data: invoices = [], isLoading: invoicesLoading } = useInvoices();
 
     const party = parties.find(p => p.id === partyId);
-    const partyWorkOrders       = workOrders.filter(wo => wo.party_id === partyId);
+    const partyWorkOrders = workOrders.filter(wo => wo.party_id === partyId);
     const partyDeliveryChallans = deliveryChallans.filter(dc => dc.party_id === partyId);
-    const partyInvoices         = invoices.filter(inv => inv.party_id === partyId);
+    const partyInvoices = invoices.filter(inv => inv.party_id === partyId);
 
     const { data, isLoading, error } = usePartyLedgerSummary(partyId);
     const summary = data ?? {
