@@ -473,9 +473,9 @@ export default function WorkOrderList() {
                                   </button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => navigate(`/work-order/${wo.id}/edit`)}>
+                                  {/* <DropdownMenuItem onClick={() => navigate(`/work-order/${wo.id}/edit`)}>
                                     <Pencil className="w-4 h-4 mr-2" />Edit Work Order
-                                  </DropdownMenuItem>
+                                  </DropdownMenuItem> */}
                                   <DropdownMenuItem onClick={() => handleDelete(wo.id)} className="text-destructive">
                                     <Trash2 className="w-4 h-4 mr-2" />Delete
                                   </DropdownMenuItem>
