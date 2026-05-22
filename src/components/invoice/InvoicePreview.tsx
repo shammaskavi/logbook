@@ -107,35 +107,35 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
     const businessName =
         businessSettings?.business_name ||
         invoice.businessName ||
-        "AAMIR JAMAL";
+        "-";
 
     const businessAddress =
         businessSettings?.business_address ||
         invoice.businessAddress ||
-        "#18/2, 2nd Cross, Vinayaka Nagar Extn, Old Guddadahalli, Bangalore 560026, Karnataka, India";
+        "-";
 
     const businessPAN =
         businessSettings?.pan ||
         invoice.businessPAN ||
-        "AMXPJ3615P";
+        "-";
 
     const businessPhone =
         businessSettings?.phone ||
         invoice.businessPhones ||
         invoice.businessPhone ||
-        "+91 98453 43015";
+        "-";
 
     const bankAccountName =
         businessSettings?.account_name || businessName;
 
     const bankAccountNumber =
-        businessSettings?.account_number || "";
+        businessSettings?.account_number || "-";
 
     const bankIfscCode =
-        businessSettings?.ifsc_code || "";
+        businessSettings?.ifsc_code || "-";
 
     const bankBranch =
-        businessSettings?.bank_branch || "";
+        businessSettings?.bank_branch || "-";
 
     const bankName =
         businessSettings?.bank_name || "";
