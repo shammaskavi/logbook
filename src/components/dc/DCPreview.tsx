@@ -1,6 +1,7 @@
 import React from "react";
 import { format } from "date-fns";
 import { useBusinessSettings } from "@/hooks/use-data";
+import { supabase } from "@/integrations/supabase/client";
 
 type DCItem = {
     work_order_number: string;
@@ -58,6 +59,21 @@ export function DCPreview({
         businessSettings?.phone ||
         (businessPhones.length > 0 ? businessPhones[0] : "-");
 
+    // Smart initials fallback — first letter of each word, max 2 chars
+    const businessInitials = resolvedBusinessName
+        .trim()
+        .split(/\s+/)
+        .map((w: string) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+
+    // Resolve logo public URL (bucket is public, stable across sessions)
+    const logoPublicUrl = businessSettings?.logo_url
+        ? supabase.storage.from("business-logos").getPublicUrl(businessSettings.logo_url).data.publicUrl
+        : null;
+
+
     // Half A4 height so two copies fit on one A4 page.
     const copyHeight = "148.5mm";
     const minimumRows = 15;
@@ -84,9 +100,17 @@ export function DCPreview({
                 {/* Header */}
                 <div className="grid grid-cols-[44px_1fr_140px] border-b border-[#8B1E14]">
                     <div className="border-r border-[#8B1E14] p-2 flex items-center justify-center">
-                        <div className="w-8 h-8 bg-[#8B1E14] text-white flex items-center justify-center font-bold text-lg leading-none">
-                            AJ
-                        </div>
+                        {logoPublicUrl ? (
+                            <img
+                                src={logoPublicUrl}
+                                alt="Business logo"
+                                style={{ width: 32, height: 32, objectFit: "contain" }}
+                            />
+                        ) : (
+                            <div className="w-8 h-8 bg-[#8B1E14] text-white flex items-center justify-center font-bold text-lg leading-none">
+                                {businessInitials}
+                            </div>
+                        )}
                     </div>
 
                     <div className="p-2">

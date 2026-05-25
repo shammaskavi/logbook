@@ -37,6 +37,10 @@ export interface BusinessSettings {
   dc_prefix: string;
   invoice_prefix: string;
 
+  // Business logo stored in Supabase Storage bucket "business-logos"
+  // Value is the storage object path, e.g. "{org_id}/logo.png"
+  logo_url: string | null;
+
   created_at?: string;
   updated_at?: string;
 }

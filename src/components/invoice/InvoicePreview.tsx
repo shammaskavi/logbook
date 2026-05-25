@@ -1,5 +1,6 @@
 import { format } from "date-fns";
 import { useBusinessSettings } from "@/hooks/use-data";
+import { supabase } from "@/integrations/supabase/client";
 
 interface InvoicePreviewProps {
     invoice: any;
@@ -109,6 +110,20 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
         invoice.businessName ||
         "-";
 
+    // Smart initials fallback — first letter of each word, max 2 chars
+    const businessInitials = businessName
+        .trim()
+        .split(/\s+/)
+        .map((w: string) => w[0])
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+
+    // Resolve logo public URL (bucket is public, so this is always stable)
+    const logoPublicUrl = businessSettings?.logo_url
+        ? supabase.storage.from("business-logos").getPublicUrl(businessSettings.logo_url).data.publicUrl
+        : null;
+
     const businessAddress =
         businessSettings?.business_address ||
         invoice.businessAddress ||
@@ -179,12 +194,20 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
             }}
         >
             <div className="border border-[#8B1E14] h-full flex flex-col">
-                {/* Header */}
+                {/* ── Logo / Initials cell ── */}
                 <div className="grid grid-cols-[56px_1fr_140px] border-b border-[#8B1E14]">
                     <div className="border-r border-[#8B1E14] p-2 flex items-center justify-center">
-                        <div className="w-10 h-10 bg-[#8B1E14] text-white flex items-center justify-center font-bold text-xl leading-none">
-                            AJ
-                        </div>
+                        {logoPublicUrl ? (
+                            <img
+                                src={logoPublicUrl}
+                                alt="Business logo"
+                                style={{ width: 40, height: 40, objectFit: "contain" }}
+                            />
+                        ) : (
+                            <div className="w-10 h-10 bg-[#8B1E14] text-white flex items-center justify-center font-bold text-xl leading-none">
+                                {businessInitials}
+                            </div>
+                        )}
                     </div>
 
                     <div className="p-2">
