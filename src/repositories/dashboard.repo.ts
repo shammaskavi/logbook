@@ -24,6 +24,12 @@ export interface TopPartyByQuantityPoint {
     total_quantity: number;
 }
 
+export interface PendingWorkByPartyPoint {
+    party_id: string;
+    party_name: string;
+    pending_quantity: number;
+}
+
 export const dashboardRepo = {
     async getSummary(
         organizationId: string
@@ -117,5 +123,24 @@ export const dashboardRepo = {
                 row.total_quantity ?? 0
             ),
         }));
-    }
+    },
+
+    async getPendingWorkByParty(
+        organizationId: string
+    ): Promise<PendingWorkByPartyPoint[]> {
+        const { data, error } = await supabase.rpc(
+            "get_pending_work_by_party",
+            {
+                p_organization_id: organizationId,
+            }
+        );
+
+        if (error) throw error;
+
+        return (data ?? []).map((row: any) => ({
+            party_id: row.party_id ?? "",
+            party_name: row.party_name ?? "Unknown",
+            pending_quantity: Number(row.pending_quantity ?? 0),
+        }));
+    },
 };

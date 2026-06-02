@@ -178,22 +178,38 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
     const fillerRows = Math.max(0, minimumRows - items.length);
 
     return (
+        <>
+        {/* ── Print styles: thead repeats on every page, continuation row shows only in print ── */}
+        <style>{`
+            @page {
+                margin: 8mm;
+            }
+            @media print {
+                #printable-invoice {
+                    padding:    0     !important;
+                    width:      100%  !important;
+                    min-height: calc(297mm - 16mm) !important;
+                }
+                #printable-invoice thead { display: table-header-group !important; }
+                .inv-cont-row           { display: table-row    !important; }
+            }
+            @media screen {
+                .inv-cont-row           { display: none         !important; }
+            }
+        `}</style>
         <div
             id="printable-invoice"
             className="bg-white text-black font-sans mx-auto"
             style={{
                 width: "210mm",
-                height: "297mm",
+                minHeight: "297mm",
                 padding: "8mm",
                 boxSizing: "border-box",
                 fontSize: "11px",
                 lineHeight: 1.25,
-                overflow: "hidden",
-                pageBreakInside: "avoid",
-                breakInside: "avoid",
             }}
         >
-            <div className="border border-[#8B1E14] h-full flex flex-col">
+            <div className="border border-[#8B1E14] flex flex-col">
                 {/* ── Logo / Initials cell ── */}
                 <div className="grid grid-cols-[56px_1fr_140px] border-b border-[#8B1E14]">
                     <div className="border-r border-[#8B1E14] p-2 flex items-center justify-center">
@@ -257,7 +273,35 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
 
                 {/* Items table */}
                 <table className="w-full border-collapse table-fixed text-[10px]">
-                    <thead>
+                    <thead style={{ display: "table-header-group" }}>
+                        {/*
+                         * Continuation reference row — hidden on screen, repeats at the
+                         * top of every printed page after page 1. Matches what QuickBooks /
+                         * Xero / Zoho show on multi-page invoices.
+                         */}
+                        <tr className="inv-cont-row">
+                            <td
+                                colSpan={6}
+                                style={{
+                                    background: "#8B1E14",
+                                    color: "#fff",
+                                    fontSize: "8.5px",
+                                    fontWeight: 600,
+                                    letterSpacing: "0.04em",
+                                    padding: "3px 8px",
+                                    borderBottom: "1px solid #8B1E14",
+                                }}
+                            >
+                                {businessName}
+                                &nbsp;·&nbsp;
+                                TAX INVOICE
+                                &nbsp;·&nbsp;
+                                {displayInvoiceNo}
+                                &nbsp;·&nbsp;
+                                Continued
+                            </td>
+                        </tr>
+
                         <tr className="bg-[#F5E7D9] text-[#8B1E14] uppercase font-bold">
                             <th className="w-[10%] border-r border-b border-[#8B1E14] px-2 py-1 text-left">
                                 WO No.
@@ -285,6 +329,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
                             <tr
                                 key={index}
                                 className={index % 2 === 0 ? "bg-white" : "bg-slate-50"}
+                                style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
                             >
                                 <td className="border-r border-[#8B1E14] px-2 py-1 align-top">
                                     {item.wo_number || "-"}
@@ -328,7 +373,10 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
                 </table>
 
                 {/* Amount in words + totals */}
-                <div className="grid grid-cols-[10%_10%_44%_12%_8%_16%] border-t border-[#8B1E14] text-[10px]">
+                <div
+                    className="grid grid-cols-[10%_10%_44%_12%_8%_16%] border-t border-[#8B1E14] text-[10px]"
+                    style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+                >
                     <div className="col-span-3 px-2 py-2 border-r border-[#8B1E14]">
                         <span className="font-semibold">Amount (in words)</span>
                         <span className="ml-2">{amountInWords}</span>
@@ -348,7 +396,10 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
 
                 {/* Optional GST rows */}
                 {totalsRows.length > 0 && (
-                    <div className="border-t border-[#8B1E14]  px-2 py-1 text-[9px] text-right space-y-0.5">
+                    <div
+                        className="border-t border-[#8B1E14] px-2 py-1 text-[9px] text-right space-y-0.5"
+                        style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+                    >
                         {totalsRows.map((row) => (
                             <div key={row.label}>
                                 {row.label}: ₹ {row.value.toFixed(2)}
@@ -358,7 +409,10 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
                 )}
 
                 {/* Bank details */}
-                <div className="border-t border-b border-[#8B1E14] px-2 py-2 text-[9px] leading-relaxed">
+                <div
+                    className="border-t border-b border-[#8B1E14] px-2 py-2 text-[9px] leading-relaxed"
+                    style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+                >
                     <span className="font-bold mr-4">Bank Details</span>
                     <span className="mr-4">
                         <span className="font-semibold">A/C Name:</span> {bankAccountName}
@@ -378,7 +432,10 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
                 </div>
 
                 {/* Footer */}
-                <div className="grid grid-cols-3 px-3 py-10 text-[9px] text-slate-600 items-end">
+                <div
+                    className="grid grid-cols-3 px-3 py-10 text-[9px] text-slate-600 items-end"
+                    style={{ breakInside: "avoid", pageBreakInside: "avoid" }}
+                >
                     <div className="text-left uppercase">Receiver's Signature</div>
                     <div className="text-center text-slate-400">
                         Thank you for your business
@@ -389,5 +446,6 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
                 </div>
             </div>
         </div>
+        </>
     );
 }

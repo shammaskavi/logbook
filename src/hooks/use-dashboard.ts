@@ -103,3 +103,30 @@ export function useTopPartiesByQuantity() {
         },
     });
 }
+
+export function usePendingWorkByParty() {
+    const { organizationId, isLoading: organizationLoading } =
+        useCurrentOrganization();
+
+    return useQuery({
+        queryKey: [
+            "dashboard_pending_work_by_party",
+            organizationId,
+        ],
+        enabled:
+            !organizationLoading && !!organizationId,
+        staleTime: 60_000,
+        gcTime: 5 * 60_000,
+        queryFn: async () => {
+            if (!organizationId) {
+                throw new Error(
+                    "No organization found for the current user."
+                );
+            }
+
+            return dashboardRepo.getPendingWorkByParty(
+                organizationId
+            );
+        },
+    });
+}
