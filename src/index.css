@@ -95,26 +95,23 @@
 }
 
 /* =========================
-   PRINT STYLES – DC PREVIEW
+   PRINT STYLES
+   -------------------------
+   Page geometry and sheet breaking live with each document, in
+   src/lib/print/PrintSheetStyles.tsx, so a document carries its own paper
+   size. What stays here is only what has to apply to any printed page.
    ========================= */
 @media print {
 
-  /* This ensures the browser doesn't try to "save ink" by hiding your black header */
+  /* Backgrounds and rules are part of these documents, not decoration — stop
+     the browser from dropping them to save ink. */
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
   }
 
-  /* Set the A4 Page defaults */
-  @page {
-    size: A4;
-    margin: 0;
-  }
-
-  /* Remove any browser-added headers/footers (like the URL or date at the bottom) */
   body {
     margin: 0;
-    -webkit-print-color-adjust: exact;
   }
 }

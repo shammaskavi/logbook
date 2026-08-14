@@ -366,8 +366,10 @@ export default function DCList() {
                             </button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem><Download className="w-4 h-4 mr-2" />Download</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openPreview(dc.id)}><Eye className="w-4 h-4 mr-2" />Preview</DropdownMenuItem>
+                            {/* Saving a PDF goes through the preview's print dialog, which
+                                is the only path that produces correct page breaks. */}
+                            <DropdownMenuItem onClick={() => openPreview(dc.id)}><Download className="w-4 h-4 mr-2" />Print / Save as PDF</DropdownMenuItem>
                             {/* <DropdownMenuItem onClick={() => navigate(`/dc/${dc.id}/edit`)}><Pencil className="w-4 h-4 mr-2" />Edit DC</DropdownMenuItem> */}
                             <DropdownMenuItem onClick={() => handleDelete(dc.id)} className="text-destructive"><Trash2 className="w-4 h-4 mr-2" />Delete</DropdownMenuItem>
                           </DropdownMenuContent>

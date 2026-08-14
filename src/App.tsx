@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import DashboardPage from "./pages/DashboardPage";
 import WorkOrderForm from "./pages/WorkOrderForm";
 import DCForm from "./pages/DCForm";
+import DeliveryChallansPage from "./pages/DeliveryChallansPage";
 import InvoicesPage from "./pages/InvoicesPage";
 import InvoiceForm from "./pages/InvoiceForm";
 import NotFound from "./pages/NotFound";
@@ -20,6 +21,7 @@ import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import PartyLedgerPage from "./pages/PartyLedgerPage";
+import PrintSandbox from "./pages/dev/PrintSandbox";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -46,6 +48,10 @@ const App = () => (
           <Routes>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            {/* Print layout harness — dev builds only, never shipped. */}
+            {import.meta.env.DEV && (
+              <Route path="/dev/print" element={<PrintSandbox />} />
+            )}
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/" element={<Index />} />
@@ -53,6 +59,7 @@ const App = () => (
                 <Route path="/parties/:id/ledger" element={<PartyLedgerPage />} />
                 <Route path="/work-order/new" element={<WorkOrderForm />} />
                 <Route path="/work-order/:id/edit" element={<WorkOrderForm />} />
+                <Route path="/dc" element={<DeliveryChallansPage />} />
                 <Route path="/dc/new" element={<DCForm />} />
                 <Route path="/dc/:id/edit" element={<DCForm />} />
                 <Route path="/invoices" element={<InvoicesPage />} />

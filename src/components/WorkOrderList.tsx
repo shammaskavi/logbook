@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import {
   ChevronDown, ChevronUp, MoreHorizontal, Pencil, Trash2,
-  Plus, FileText, Search, ClipboardList, SlidersHorizontal, X
+  Plus, Search, ClipboardList, SlidersHorizontal, X
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -18,20 +18,16 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import StatusBadge from "@/components/StatusBadge";
-import DCList from "@/components/DCList";
 import { getWorkOrderTotals, getWorkOrderStatus } from "@/types";
-import { useWorkOrders, useDeleteWorkOrder, useDeleteWorkOrders, useParties, useJobWorkTypes, useDeliveryChallans } from "@/hooks/use-data";
+import { useWorkOrders, useDeleteWorkOrder, useDeleteWorkOrders, useParties, useJobWorkTypes } from "@/hooks/use-data";
 import { useToast } from "@/hooks/use-toast";
 import ConfirmDialog from "@/components/ConfirmDialog";
-
-type Tab = "orders" | "dc";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 export default function WorkOrderList() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [tab, setTab] = useState<Tab>("orders");
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
@@ -50,7 +46,6 @@ export default function WorkOrderList() {
   const { data: workOrders = [], isLoading: loadingOrders } = useWorkOrders();
   const { data: parties = [] } = useParties();
   const { data: jobTypes = [] } = useJobWorkTypes();
-  const { data: dcs = [] } = useDeliveryChallans();
   const deleteWO = useDeleteWorkOrder();
   const deleteWOs = useDeleteWorkOrders();
 
@@ -186,34 +181,10 @@ export default function WorkOrderList() {
             <Plus className="w-4 h-4" />
             <span className="hidden sm:inline">Create WO</span>
           </Button>
-          <Button size="sm" variant="outline" onClick={() => navigate("/dc/new")} className="gap-1.5">
-            <FileText className="w-4 h-4" />
-            <span className="hidden sm:inline">Create DC</span>
-          </Button>
         </div>
       </div>
 
-      {/* ── Tabs ── */}
-      <div className="flex gap-4 border-b border-border mb-4">
-        <button
-          onClick={() => setTab("orders")}
-          className={`pb-3 text-sm font-medium transition-colors border-b-2 ${tab === "orders" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-        >
-          All Orders ({workOrders.length})
-        </button>
-        <button
-          onClick={() => setTab("dc")}
-          className={`pb-3 text-sm font-medium transition-colors border-b-2 ${tab === "dc" ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"}`}
-        >
-          DC Generated ({dcs.length})
-        </button>
-      </div>
-
-      {tab === "dc" ? (
-        <DCList />
-      ) : (
-        <>
-          {/* ── Filters Row ── */}
+      {/* ── Filters Row ── */}
           <div className="flex items-center gap-2 mb-4">
             {/* Search — always visible */}
             <div className="relative flex-1">
@@ -516,8 +487,6 @@ export default function WorkOrderList() {
               </div>
             </>
           )}
-        </>
-      )}
 
       <ConfirmDialog
         open={confirmState.open}

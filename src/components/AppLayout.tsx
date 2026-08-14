@@ -6,6 +6,7 @@ import {
   LayoutDashboard,
   LogOut,
   ChevronRight,
+  Truck,
 } from "lucide-react";
 import Logo from "../assets/logbook-logo.png";
 import { useAuth } from "@/context/AuthContext";
@@ -13,11 +14,14 @@ import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
+// `shortLabel` is used by the mobile tab bar, where five items share the width
+// and the full labels would truncate.
 const navItems = [
-  { icon: Layers2, label: "Work Orders", path: "/" },
-  { icon: FileText, label: "Invoices", path: "/invoices" },
-  { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
-  { icon: Settings, label: "Settings", path: "/settings/parties" },
+  { icon: Layers2, label: "Work Orders", shortLabel: "Orders", path: "/" },
+  { icon: Truck, label: "Delivery Challans", shortLabel: "Challans", path: "/dc" },
+  { icon: FileText, label: "Invoices", shortLabel: "Invoices", path: "/invoices" },
+  { icon: LayoutDashboard, label: "Dashboard", shortLabel: "Dashboard", path: "/dashboard" },
+  { icon: Settings, label: "Settings", shortLabel: "Settings", path: "/settings/parties" },
 ];
 
 export default function AppLayout() {
@@ -137,8 +141,9 @@ export default function AppLayout() {
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
+              aria-label={item.label}
               className={cn(
-                "flex-1 flex flex-col items-center justify-center gap-1 transition-colors min-w-0",
+                "flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors min-w-0",
                 active
                   ? "text-sidebar-primary"
                   : "text-sidebar-foreground/50 hover:text-sidebar-foreground/80"
@@ -146,10 +151,10 @@ export default function AppLayout() {
             >
               <item.icon className="w-5 h-5 flex-shrink-0" />
               <span className={cn(
-                "text-[10px] font-medium truncate w-full text-center px-1 leading-tight",
+                "text-[9px] font-medium truncate w-full text-center px-0.5 leading-tight",
                 active ? "text-sidebar-primary" : "text-sidebar-foreground/50"
               )}>
-                {item.label}
+                {item.shortLabel}
               </span>
             </button>
           );

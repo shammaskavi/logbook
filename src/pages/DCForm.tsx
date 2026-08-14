@@ -187,7 +187,7 @@ export default function DCForm() {
         await addDC.mutateAsync(dcData);
         toast({ title: "DC created" });
       }
-      navigate("/");
+      navigate("/dc");
     } catch (e: any) {
       toast({ title: "Error saving DC", description: e.message, variant: "destructive" });
     }

@@ -14,24 +14,104 @@ export type Database = {
   }
   public: {
     Tables: {
-      dc_items: {
+      business_settings: {
         Row: {
-          delivery_challan_id: string
-          id: string
-          job_work_type_name: string
-          quantity: number
+          account_name: string | null
+          account_number: string | null
+          bank_branch: string | null
+          bank_name: string | null
+          business_address: string | null
+          business_name: string
+          created_at: string
+          dc_prefix: string
+          email: string | null
+          gstin: string | null
+          ifsc_code: string | null
+          invoice_prefix: string
+          logo_url: string | null
+          organization_id: string
+          pan: string | null
+          phone: string | null
+          updated_at: string
+          work_order_prefix: string
         }
         Insert: {
-          delivery_challan_id: string
-          id?: string
-          job_work_type_name: string
-          quantity: number
+          account_name?: string | null
+          account_number?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
+          business_address?: string | null
+          business_name: string
+          created_at?: string
+          dc_prefix?: string
+          email?: string | null
+          gstin?: string | null
+          ifsc_code?: string | null
+          invoice_prefix?: string
+          logo_url?: string | null
+          organization_id: string
+          pan?: string | null
+          phone?: string | null
+          updated_at?: string
+          work_order_prefix?: string
         }
         Update: {
-          delivery_challan_id?: string
+          account_name?: string | null
+          account_number?: string | null
+          bank_branch?: string | null
+          bank_name?: string | null
+          business_address?: string | null
+          business_name?: string
+          created_at?: string
+          dc_prefix?: string
+          email?: string | null
+          gstin?: string | null
+          ifsc_code?: string | null
+          invoice_prefix?: string
+          logo_url?: string | null
+          organization_id?: string
+          pan?: string | null
+          phone?: string | null
+          updated_at?: string
+          work_order_prefix?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dc_items: {
+        Row: {
+          delivery_challan_id: string | null
+          id: string
+          invoiced_quantity: number | null
+          job_work_type_name: string
+          organization_id: string
+          quantity: number
+          work_order_item_id: string | null
+        }
+        Insert: {
+          delivery_challan_id?: string | null
           id?: string
+          invoiced_quantity?: number | null
+          job_work_type_name: string
+          organization_id: string
+          quantity: number
+          work_order_item_id?: string | null
+        }
+        Update: {
+          delivery_challan_id?: string | null
+          id?: string
+          invoiced_quantity?: number | null
           job_work_type_name?: string
+          organization_id?: string
           quantity?: number
+          work_order_item_id?: string | null
         }
         Relationships: [
           {
@@ -41,40 +121,67 @@ export type Database = {
             referencedRelation: "delivery_challans"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "dc_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dc_items_work_order_item_fk"
+            columns: ["work_order_item_id"]
+            isOneToOne: false
+            referencedRelation: "work_order_items"
+            referencedColumns: ["id"]
+          },
         ]
       }
       delivery_challans: {
         Row: {
-          created_at: string
+          created_at: string | null
           dc_number: string
           generated_date: string
           id: string
-          linked_work_order_ids: string[]
-          party_id: string
+          linked_work_order_ids: string[] | null
+          organization_id: string
+          party_gstin: string | null
+          party_id: string | null
           party_name: string
-          transporter_name: string
+          transporter_name: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           dc_number: string
           generated_date: string
           id?: string
-          linked_work_order_ids?: string[]
-          party_id: string
+          linked_work_order_ids?: string[] | null
+          organization_id: string
+          party_gstin?: string | null
+          party_id?: string | null
           party_name: string
-          transporter_name?: string
+          transporter_name?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           dc_number?: string
           generated_date?: string
           id?: string
-          linked_work_order_ids?: string[]
-          party_id?: string
+          linked_work_order_ids?: string[] | null
+          organization_id?: string
+          party_gstin?: string | null
+          party_id?: string | null
           party_name?: string
-          transporter_name?: string
+          transporter_name?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "delivery_challans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "delivery_challans_party_id_fkey"
             columns: ["party_id"]
@@ -84,66 +191,279 @@ export type Database = {
           },
         ]
       }
-      job_work_types: {
+      invoice_items: {
         Row: {
-          active: boolean
+          amount: number
+          dc_item_id: string | null
+          dc_number: string | null
           id: string
-          name: string
+          invoice_id: string | null
+          organization_id: string
+          particulars: string | null
+          quantity: number
+          rate: number
+          wo_number: string | null
+          work_order_id: string | null
         }
         Insert: {
-          active?: boolean
+          amount: number
+          dc_item_id?: string | null
+          dc_number?: string | null
           id?: string
-          name: string
+          invoice_id?: string | null
+          organization_id: string
+          particulars?: string | null
+          quantity: number
+          rate: number
+          wo_number?: string | null
+          work_order_id?: string | null
         }
         Update: {
-          active?: boolean
+          amount?: number
+          dc_item_id?: string | null
+          dc_number?: string | null
+          id?: string
+          invoice_id?: string | null
+          organization_id?: string
+          particulars?: string | null
+          quantity?: number
+          rate?: number
+          wo_number?: string | null
+          work_order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_dc_item_id_fkey"
+            columns: ["dc_item_id"]
+            isOneToOne: false
+            referencedRelation: "dc_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          cgst_percent: number | null
+          created_at: string | null
+          grand_total: number | null
+          gst_type: string | null
+          id: string
+          igst_percent: number | null
+          invoice_date: string
+          invoice_number: string
+          organization_id: string
+          party_gstin: string | null
+          party_id: string | null
+          party_name: string
+          sgst_percent: number | null
+          subtotal: number | null
+          tax_amount: number | null
+        }
+        Insert: {
+          cgst_percent?: number | null
+          created_at?: string | null
+          grand_total?: number | null
+          gst_type?: string | null
+          id?: string
+          igst_percent?: number | null
+          invoice_date?: string
+          invoice_number: string
+          organization_id: string
+          party_gstin?: string | null
+          party_id?: string | null
+          party_name: string
+          sgst_percent?: number | null
+          subtotal?: number | null
+          tax_amount?: number | null
+        }
+        Update: {
+          cgst_percent?: number | null
+          created_at?: string | null
+          grand_total?: number | null
+          gst_type?: string | null
+          id?: string
+          igst_percent?: number | null
+          invoice_date?: string
+          invoice_number?: string
+          organization_id?: string
+          party_gstin?: string | null
+          party_id?: string | null
+          party_name?: string
+          sgst_percent?: number | null
+          subtotal?: number | null
+          tax_amount?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_work_types: {
+        Row: {
+          active: boolean | null
+          id: string
+          name: string
+          organization_id: string
+        }
+        Insert: {
+          active?: boolean | null
+          id?: string
+          name: string
+          organization_id: string
+        }
+        Update: {
+          active?: boolean | null
           id?: string
           name?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_work_types_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
         }
         Relationships: []
       }
       parties: {
         Row: {
-          created_at: string
+          created_at: string | null
+          gstin: string | null
           id: string
           name: string
+          organization_id: string
+          phone_number: string | null
+          updated_at: string | null
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
+          gstin?: string | null
           id?: string
           name: string
+          organization_id: string
+          phone_number?: string | null
+          updated_at?: string | null
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
+          gstin?: string | null
           id?: string
           name?: string
+          organization_id?: string
+          phone_number?: string | null
+          updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "parties_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       work_order_items: {
         Row: {
           id: string
-          job_work_type_id: string
+          job_work_type_id: string | null
           job_work_type_name: string
+          organization_id: string
           pending_quantity: number
           quantity: number
-          work_order_id: string
+          work_order_id: string | null
         }
         Insert: {
           id?: string
-          job_work_type_id: string
+          job_work_type_id?: string | null
           job_work_type_name: string
-          pending_quantity?: number
+          organization_id: string
+          pending_quantity: number
           quantity: number
-          work_order_id: string
+          work_order_id?: string | null
         }
         Update: {
           id?: string
-          job_work_type_id?: string
+          job_work_type_id?: string | null
           job_work_type_name?: string
+          organization_id?: string
           pending_quantity?: number
           quantity?: number
-          work_order_id?: string
+          work_order_id?: string | null
         }
         Relationships: [
           {
@@ -151,6 +471,13 @@ export type Database = {
             columns: ["job_work_type_id"]
             isOneToOne: false
             referencedRelation: "job_work_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "work_order_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -164,33 +491,43 @@ export type Database = {
       }
       work_orders: {
         Row: {
-          created_at: string
+          created_at: string | null
           id: string
-          party_id: string
+          organization_id: string
+          party_id: string | null
           party_name: string
           received_date: string
-          updated_at: string
+          updated_at: string | null
           work_order_number: string
         }
         Insert: {
-          created_at?: string
+          created_at?: string | null
           id?: string
-          party_id: string
+          organization_id: string
+          party_id?: string | null
           party_name: string
           received_date: string
-          updated_at?: string
+          updated_at?: string | null
           work_order_number: string
         }
         Update: {
-          created_at?: string
+          created_at?: string | null
           id?: string
-          party_id?: string
+          organization_id?: string
+          party_id?: string | null
           party_name?: string
           received_date?: string
-          updated_at?: string
+          updated_at?: string | null
           work_order_number?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "work_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "work_orders_party_id_fkey"
             columns: ["party_id"]
@@ -205,7 +542,165 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_delivery_challan_with_effects:
+        | {
+            Args: {
+              p_dc_number: string
+              p_generated_date: string
+              p_items: Json
+              p_party_id: string
+              p_party_name: string
+              p_transporter_name: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_dc_number: string
+              p_generated_date: string
+              p_items: Json
+              p_organization_id: string
+              p_party_id: string
+              p_party_name: string
+              p_transporter_name: string
+            }
+            Returns: string
+          }
+      create_invoice_with_effects: {
+        Args: {
+          p_cgst_percent: number
+          p_gst_type: string
+          p_igst_percent: number
+          p_invoice_date: string
+          p_invoice_number: string
+          p_items: Json
+          p_organization_id: string
+          p_party_gstin: string
+          p_party_id: string
+          p_party_name: string
+          p_sgst_percent: number
+        }
+        Returns: string
+      }
+      create_work_order_with_items:
+        | {
+            Args: {
+              p_items: Json
+              p_organization_id: string
+              p_party_id: string
+              p_party_name: string
+              p_received_date: string
+              p_work_order_number: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_items: Json
+              p_party_id: string
+              p_party_name: string
+              p_received_date: string
+              p_work_order_number: string
+            }
+            Returns: string
+          }
+      delete_delivery_challan_with_effects: {
+        Args: { p_dc_id: string }
+        Returns: string
+      }
+      delete_work_order_with_effects: {
+        Args: { p_work_order_id: string }
+        Returns: undefined
+      }
+      get_billable_dc_items:
+        | {
+            Args: { p_organization_id: string; p_party_id: string }
+            Returns: {
+              dc_id: string
+              dc_item_id: string
+              dc_number: string
+              delivered_qty: number
+              invoiced_qty: number
+              job_work_type_name: string
+              remaining_qty: number
+              wo_number: string
+              work_order_id: string
+            }[]
+          }
+        | {
+            Args: { p_party_id: string }
+            Returns: {
+              dc_id: string
+              dc_item_id: string
+              dc_number: string
+              delivered_qty: number
+              invoiced_qty: number
+              job_work_type_name: string
+              remaining_qty: number
+              wo_number: string
+              work_order_id: string
+            }[]
+          }
+      get_dashboard_summary: {
+        Args: { p_organization_id: string }
+        Returns: {
+          active_customers: number
+          invoice_count: number
+          pending_quantity: number
+          revenue_this_month: number
+          unbilled_amount: number
+          work_order_count: number
+        }[]
+      }
+      get_job_work_type_breakdown: {
+        Args: { p_organization_id: string }
+        Returns: {
+          job_work_type_name: string
+          total_quantity: number
+        }[]
+      }
+      get_monthly_quantity_trend: {
+        Args: { p_organization_id: string }
+        Returns: {
+          month: string
+          total_quantity: number
+        }[]
+      }
+      get_party_ledger_summary: {
+        Args: { p_organization_id: string; p_party_id: string }
+        Returns: {
+          outstanding_amount: number
+          total_invoiced: number
+          total_quantity: number
+          total_work_orders: number
+        }[]
+      }
+      get_pending_work_by_party: {
+        Args: { p_organization_id: string }
+        Returns: {
+          party_id: string
+          party_name: string
+          pending_quantity: number
+        }[]
+      }
+      get_top_parties_by_quantity: {
+        Args: { p_organization_id: string }
+        Returns: {
+          party_name: string
+          total_quantity: number
+        }[]
+      }
+      update_work_order_with_items: {
+        Args: {
+          p_items: Json
+          p_party_id: string
+          p_party_name: string
+          p_received_date: string
+          p_work_order_id: string
+          p_work_order_number: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
