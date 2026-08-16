@@ -37,8 +37,13 @@ export function DCPreviewModal({ dcId, open, onClose }: DCPreviewModalProps) {
             });
         });
 
+        // A manual challan line has no work order behind it, so it falls back
+        // to the number typed in on that line.
         return dc.items.map(item => ({
-            work_order_number: itemToWONumber.get(item.work_order_item_id) || "-",
+            work_order_number:
+                itemToWONumber.get(item.work_order_item_id) ||
+                item.manual_wo_number ||
+                "-",
             job_work_type_name: item.job_work_type_name,
             quantity: item.quantity,
         }));

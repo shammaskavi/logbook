@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { createWorkOrder, updateWorkOrder, deleteWorkOrderWithEffects } from "@/repositories/workOrders.repo";
 import {
   createDeliveryChallanWithEffects,
+  createManualDeliveryChallan,
   deleteDeliveryChallanWithEffects,
 } from "@/repositories/deliveryChallans.repo";
 import { invoicesRepo, BillableDCItem, CreateInvoicePayload } from "@/repositories/invoices.repo";
@@ -305,6 +306,7 @@ export function useDeliveryChallans() {
             id: i.id,
             work_order_item_id: i.work_order_item_id,
             job_work_type_name: i.job_work_type_name,
+            manual_wo_number: i.manual_wo_number ?? null,
             quantity: i.quantity,
             invoiced_quantity: i.invoiced_quantity ?? 0,
             remaining_billable_quantity:
@@ -334,6 +336,31 @@ export function useAddDeliveryChallan() {
       });
       qc.invalidateQueries({
         queryKey: ["work_orders", organizationId],
+      });
+    },
+  });
+}
+
+export function useAddManualDeliveryChallan() {
+  const qc = useQueryClient();
+  const { organizationId } = useCurrentOrganization();
+
+  return useMutation({
+    mutationFn: async (payload: any) => {
+      if (!organizationId) {
+        throw new Error("No organization found for the current user.");
+      }
+
+      return createManualDeliveryChallan(payload, organizationId);
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: ["delivery_challans", organizationId],
+      });
+      // A manual challan is immediately billable, so the invoice screen's
+      // cached list is stale.
+      qc.invalidateQueries({
+        queryKey: ["billable_dc_items", organizationId],
       });
     },
   });

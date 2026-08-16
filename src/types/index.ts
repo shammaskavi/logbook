@@ -53,6 +53,11 @@ export interface DCItem {
   quantity: number;
   invoiced_quantity?: number;
   remaining_billable_quantity?: number;
+  /**
+   * Work order number typed in by hand on a free-form challan line. Null when
+   * the line came from a work order, which supplies the number via the link.
+   */
+  manual_wo_number?: string | null;
 }
 
 export type InvoiceGSTType = "cgst_sgst" | "igst" | "none";

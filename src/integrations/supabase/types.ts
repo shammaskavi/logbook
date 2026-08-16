@@ -91,6 +91,7 @@ export type Database = {
           id: string
           invoiced_quantity: number | null
           job_work_type_name: string
+          manual_wo_number: string | null
           organization_id: string
           quantity: number
           work_order_item_id: string | null
@@ -100,6 +101,7 @@ export type Database = {
           id?: string
           invoiced_quantity?: number | null
           job_work_type_name: string
+          manual_wo_number?: string | null
           organization_id: string
           quantity: number
           work_order_item_id?: string | null
@@ -109,6 +111,7 @@ export type Database = {
           id?: string
           invoiced_quantity?: number | null
           job_work_type_name?: string
+          manual_wo_number?: string | null
           organization_id?: string
           quantity?: number
           work_order_item_id?: string | null
@@ -579,6 +582,18 @@ export type Database = {
           p_party_id: string
           p_party_name: string
           p_sgst_percent: number
+        }
+        Returns: string
+      }
+      create_manual_delivery_challan: {
+        Args: {
+          p_dc_number: string
+          p_generated_date: string
+          p_items: Json
+          p_organization_id: string
+          p_party_id: string
+          p_party_name: string
+          p_transporter_name: string
         }
         Returns: string
       }

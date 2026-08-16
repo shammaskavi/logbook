@@ -8,6 +8,7 @@ import DashboardPage from "./pages/DashboardPage";
 import WorkOrderForm from "./pages/WorkOrderForm";
 import DCForm from "./pages/DCForm";
 import DeliveryChallansPage from "./pages/DeliveryChallansPage";
+import ManualDCForm from "./pages/ManualDCForm";
 import InvoicesPage from "./pages/InvoicesPage";
 import InvoiceForm from "./pages/InvoiceForm";
 import NotFound from "./pages/NotFound";
@@ -61,6 +62,7 @@ const App = () => (
                 <Route path="/work-order/:id/edit" element={<WorkOrderForm />} />
                 <Route path="/dc" element={<DeliveryChallansPage />} />
                 <Route path="/dc/new" element={<DCForm />} />
+                <Route path="/dc/new/manual" element={<ManualDCForm />} />
                 <Route path="/dc/:id/edit" element={<DCForm />} />
                 <Route path="/invoices" element={<InvoicesPage />} />
                 <Route path="/invoices/new" element={<InvoiceForm />} />
