@@ -1,10 +1,10 @@
 {
-  "//": "Mirrors how Vercel compiles the api/ folder: it uses the ROOT tsconfig's compilerOptions with CommonJS defaults, NOT tsconfig.app.json. Kept as a separate project so `npm run typecheck` catches api-only breakage locally instead of at deploy time.",
+  "//": "Mirrors how Vercel compiles api/: it uses the ROOT tsconfig's compilerOptions with module NodeNext (confirmed from a real deploy log), NOT tsconfig.app.json. Kept as its own project so `npm run typecheck` catches api-only breakage locally instead of at deploy time.",
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "module": "CommonJS",
-    "moduleResolution": "Node10",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "target": "ES2022",
     "lib": ["ES2022", "DOM"],
     "types": ["node"]

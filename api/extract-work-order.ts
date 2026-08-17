@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import contract from "../src/lib/extraction/contract.json";
+import { EXTRACTION_PROMPT, EXTRACTION_SCHEMA_GEMINI } from "../src/lib/extraction/contract.js";
 
 /**
  * Reads a photographed job-work slip and returns a draft work order.
@@ -8,10 +8,16 @@ import contract from "../src/lib/extraction/contract.json";
  * browser, and the caller has to be an authenticated user of this app — an open
  * endpoint would let anyone spend the project's model quota.
  *
+ * The `.js` extension on the contract import is deliberate and required: Vercel
+ * type-checks api/ as NodeNext, which rejects extensionless relative imports.
+ * TypeScript resolves `contract.js` to `contract.ts`, and esbuild — which does
+ * the actual bundling — resolves it the same way. Both were verified before
+ * settling on this form; dropping the extension breaks the deploy type-check.
+ *
  * Provider is deliberately isolated to `callGemini` below. The prompt and
- * response schema come from `contract.json`, which the evaluation script in
- * scripts/extract-with-gemini.mjs reads from too, so measured accuracy and
- * shipped behaviour cannot drift apart.
+ * response schema come from `src/lib/extraction/contract.ts`, which the
+ * evaluation script in scripts/extract-with-gemini.mjs loads too, so measured
+ * accuracy and shipped behaviour cannot drift apart.
  */
 
 const GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta";
@@ -165,13 +171,13 @@ async function callGemini(
         {
           parts: [
             { inlineData: { mimeType, data: imageBase64 } },
-            { text: contract.prompt },
+            { text: EXTRACTION_PROMPT },
           ],
         },
       ],
       generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: contract.gemini,
+        responseSchema: EXTRACTION_SCHEMA_GEMINI,
       },
     }),
   });

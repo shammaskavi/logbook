@@ -32,7 +32,7 @@ import { tmpdir } from "node:os";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const imageDir = join(root, "samples", "work-orders");
 const outputDir = join(root, "samples", "output");
-const contractPath = join(root, "src", "lib", "extraction", "contract.json");
+const contractPath = join(root, "src", "lib", "extraction", "contract.ts");
 
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
 
@@ -139,7 +139,22 @@ function prepareImage(sourcePath) {
 }
 
 // ── request ─────────────────────────────────────────────────────────────────
-const contract = JSON.parse(readFileSync(contractPath, "utf8"));
+/**
+ * The contract is a TypeScript module (see the note in contract.ts on why it is
+ * not JSON), so compile it to a temporary ESM file and import that. esbuild
+ * already ships with Vite, so this needs no extra dependency.
+ */
+async function loadContract() {
+  const compiled = join(tmpdir(), `slip-contract-${process.pid}.mjs`);
+  execFileSync(
+    "npx",
+    ["esbuild", contractPath, "--format=esm", `--outfile=${compiled}`, "--log-level=error"],
+    { cwd: root, stdio: "inherit" }
+  );
+  return import(`file://${compiled}`);
+}
+
+const contract = await loadContract();
 
 async function callGemini(model, imagePath) {
   const prepared = prepareImage(imagePath);
@@ -153,13 +168,13 @@ async function callGemini(model, imagePath) {
         {
           parts: [
             { inlineData: { mimeType: "image/jpeg", data: base64 } },
-            { text: contract.prompt },
+            { text: contract.EXTRACTION_PROMPT },
           ],
         },
       ],
       generationConfig: {
         responseMimeType: "application/json",
-        responseSchema: contract.gemini,
+        responseSchema: contract.EXTRACTION_SCHEMA_GEMINI,
       },
     }),
   });
