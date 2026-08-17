@@ -13,6 +13,16 @@ import { cn } from "@/lib/utils";
 import { WorkOrderItem } from "@/types";
 import { useWorkOrders, useAddWorkOrder, useUpdateWorkOrder, useParties, useJobWorkTypes } from "@/hooks/use-data";
 import { useToast } from "@/hooks/use-toast";
+import ScanSlipCard from "@/components/work-order/ScanSlipCard";
+import JobWorkFormModal from "@/components/settings/JobWorkFormModal";
+import { useExtractWorkOrder } from "@/hooks/use-extraction";
+import { prepareWorkOrder } from "@/lib/extraction/applyExtraction";
+
+/**
+ * A form row. `extracted_text` is what a scan read off the slip for this line —
+ * kept so the user can see what to correct when it didn't match a job work.
+ */
+type FormItem = Partial<WorkOrderItem> & { extracted_text?: string };
 
 function generateId() {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -43,11 +53,57 @@ export default function WorkOrderForm() {
   );
   const [partyId, setPartyId] = useState(existingOrder?.party_id || "");
   const [workOrderNumber, setWorkOrderNumber] = useState(existingOrder?.work_order_number || "");
-  const [items, setItems] = useState<Partial<WorkOrderItem>[]>(
+  const [items, setItems] = useState<FormItem[]>(
     existingOrder?.items || [{ id: generateId(), job_work_type_id: "", quantity: 0, pending_quantity: 0 }]
   );
 
   const [partyModalOpen, setPartyModalOpen] = useState(false);
+
+  // ── Scanning a slip ──
+  const extract = useExtractWorkOrder();
+  const [scanWarnings, setScanWarnings] = useState<string[]>([]);
+  const [scannedFrom, setScannedFrom] = useState<string | null>(null);
+  const [scanError, setScanError] = useState<string | null>(null);
+  const [jobWorkModal, setJobWorkModal] = useState<{ index: number; name: string } | null>(null);
+
+  const handleScan = async (file: File) => {
+    setScanError(null);
+
+    try {
+      const { extracted, model } = await extract.mutateAsync(file);
+      const prepared = prepareWorkOrder(extracted, parties, activeJobTypes);
+
+      if (prepared.receivedDate) setReceivedDate(prepared.receivedDate);
+      if (prepared.partyId) setPartyId(prepared.partyId);
+      if (prepared.workOrderNumber) setWorkOrderNumber(prepared.workOrderNumber);
+
+      if (prepared.items.length > 0) {
+        setItems(
+          prepared.items.map(item => ({
+            id: generateId(),
+            job_work_type_id: item.jobWorkTypeId ?? "",
+            job_work_type_name: "",
+            quantity: item.quantity,
+            pending_quantity: item.quantity,
+            extracted_text: item.extractedText,
+          }))
+        );
+      }
+
+      setScanWarnings(prepared.warnings);
+      setScannedFrom(model);
+    } catch (e) {
+      setScanError(e instanceof Error ? e.message : "Something went wrong.");
+      setScannedFrom(null);
+      setScanWarnings([]);
+    }
+  };
+
+  const dismissScan = () => {
+    setScanError(null);
+    setScannedFrom(null);
+    setScanWarnings([]);
+  };
 
   const addItem = () => {
     setItems([...items, { id: generateId(), job_work_type_id: "", quantity: 0, pending_quantity: 0 }]);
@@ -61,7 +117,7 @@ export default function WorkOrderForm() {
   const updateItem = (idx: number, field: string, value: string | number) => {
     setItems(items.map((item, i) => {
       if (i !== idx) return item;
-      const updated = { ...item, [field]: value };
+      const updated: FormItem = { ...item, [field]: value };
       if (field === "quantity" && !isEdit) {
         updated.pending_quantity = value as number;
       }
@@ -130,6 +186,17 @@ export default function WorkOrderForm() {
         </div>
       </div>
 
+      {!isEdit && (
+        <ScanSlipCard
+          isScanning={extract.isPending}
+          warnings={scanWarnings}
+          scannedFrom={scannedFrom}
+          error={scanError}
+          onPickFile={handleScan}
+          onDismiss={dismissScan}
+        />
+      )}
+
       <div className="bg-card rounded-lg border border-border p-6 mb-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div>
@@ -190,14 +257,38 @@ export default function WorkOrderForm() {
 
         {items.map((item, idx) => (
           <div key={item.id || idx} className="flex flex-col gap-3 px-6 py-4 border-b border-border md:grid md:grid-cols-[1fr_200px_60px] md:items-center md:gap-0">
-            <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1 md:pr-4">
               <span className="text-xs text-muted-foreground md:hidden">Job Work</span>
-              <Select value={item.job_work_type_id || ""} onValueChange={v => updateItem(idx, "job_work_type_id", v)}>
-                <SelectTrigger className="w-full"><SelectValue placeholder="Select Job Work" /></SelectTrigger>
-                <SelectContent>
-                  {activeJobTypes.map(j => <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <div className="flex gap-2">
+                <Select value={item.job_work_type_id || ""} onValueChange={v => updateItem(idx, "job_work_type_id", v)}>
+                  <SelectTrigger className="w-full"><SelectValue placeholder="Select Job Work" /></SelectTrigger>
+                  <SelectContent>
+                    {activeJobTypes.map(j => <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+
+                {/* Only offered for a scanned row that matched nothing — the slip
+                    wording is the obvious name for the job work being created. */}
+                {item.extracted_text && !item.job_work_type_id && (
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0"
+                    title={`Add "${item.extracted_text}" as a job work`}
+                    onClick={() => setJobWorkModal({ index: idx, name: item.extracted_text! })}
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+
+              {/* What the slip actually said, so the user can correct rather than
+                  reopen the photo. Shown until the row resolves to a job work. */}
+              {item.extracted_text && !item.job_work_type_id && (
+                <p className="text-xs text-amber-700 mt-0.5">
+                  Slip reads &ldquo;{item.extracted_text}&rdquo; — pick the closest, or add it.
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-1 md:items-start">
               <span className="text-xs text-muted-foreground md:hidden">Quantity</span>
@@ -220,6 +311,19 @@ export default function WorkOrderForm() {
           <Plus className="w-4 h-4" /> Add New Item
         </button>
       </div>
+
+      <JobWorkFormModal
+        open={jobWorkModal !== null}
+        onClose={() => setJobWorkModal(null)}
+        mode="create"
+        initialName={jobWorkModal?.name}
+        onSuccess={(created) => {
+          if (jobWorkModal) {
+            updateItem(jobWorkModal.index, "job_work_type_id", created.id);
+          }
+          setJobWorkModal(null);
+        }}
+      />
 
       <PartyFormModal
         open={partyModalOpen}

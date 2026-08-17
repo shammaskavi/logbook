@@ -26,6 +26,10 @@ interface JobWorkFormModalProps {
         name: string;
         active: boolean | null;
     };
+    /** Pre-fills the name in create mode — used when adding a job work read off a scanned slip. */
+    initialName?: string;
+    /** Fires with the created row so a caller can select it immediately. */
+    onSuccess?: (jobWork: { id: string; name: string }) => void;
 }
 
 export default function JobWorkFormModal({
@@ -33,6 +37,8 @@ export default function JobWorkFormModal({
     onClose,
     mode,
     initialData,
+    initialName,
+    onSuccess,
 }: JobWorkFormModalProps) {
     const { mutateAsync: createJobWork, isPending: creating } =
         useCreateJobWork();
@@ -49,10 +55,10 @@ export default function JobWorkFormModal({
             setName(initialData.name);
             setActive(initialData.active ?? true);
         } else {
-            setName("");
+            setName(initialName ?? "");
             setActive(true);
         }
-    }, [mode, initialData, open]);
+    }, [mode, initialData, initialName, open]);
 
     const handleSubmit = async () => {
         if (!name.trim()) {
@@ -62,8 +68,11 @@ export default function JobWorkFormModal({
 
         try {
             if (mode === "create") {
-                await createJobWork(name);
+                const created = await createJobWork(name);
                 toast.success("Job Work created successfully");
+                if (created?.id) {
+                    onSuccess?.({ id: created.id, name: created.name });
+                }
             } else if (mode === "edit" && initialData) {
                 await updateJobWork({
                     id: initialData.id,

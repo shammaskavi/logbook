@@ -23,6 +23,7 @@ import LoginPage from "./pages/auth/LoginPage";
 import SignupPage from "./pages/auth/SignupPage";
 import PartyLedgerPage from "./pages/PartyLedgerPage";
 import PrintSandbox from "./pages/dev/PrintSandbox";
+import ScanSandbox from "./pages/dev/ScanSandbox";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -52,6 +53,9 @@ const App = () => (
             {/* Print layout harness — dev builds only, never shipped. */}
             {import.meta.env.DEV && (
               <Route path="/dev/print" element={<PrintSandbox />} />
+            )}
+            {import.meta.env.DEV && (
+              <Route path="/dev/scan" element={<ScanSandbox />} />
             )}
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>

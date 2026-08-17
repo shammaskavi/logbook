@@ -1,19 +1,27 @@
 -- ============================================================================
 -- PROPOSED — review before running. Nothing here has been executed.
 --
--- Closes the anonymous read access to every business table. Filename is
--- deliberately not a timestamp so it is not picked up by `supabase db push`
--- until you rename it.
+-- Closes the anonymous read access to your business data. Filename is
+-- deliberately not a timestamp so `supabase db push` will not pick it up until
+-- you rename it.
 --
--- Run in STAGES. Stage 1 is safe to run immediately. Stage 2 changes how the
--- app authorises every query and must be tested.
+-- Split into three stages, ordered by (value / risk). Stage A and B together
+-- close the public data hole and neither touches the signup flow. Stage C is
+-- the one that needs care.
 -- ============================================================================
 
 
 -- ╔══════════════════════════════════════════════════════════════════════════╗
--- ║ STAGE 1 — run now. Stops anonymous access to bank details.               ║
--- ║ Zero risk to the running app: a second policy already grants the same    ║
--- ║ table to `authenticated`, which is what the app actually uses.           ║
+-- ║ STAGE A — one line, run now.                                             ║
+-- ║                                                                          ║
+-- ║ Stops ANONYMOUS reads of business_settings, which holds bank account     ║
+-- ║ numbers, IFSC, GSTIN and PAN. The `{public}` role in that policy         ║
+-- ║ includes unauthenticated callers.                                        ║
+-- ║                                                                          ║
+-- ║ Zero risk: a second policy already grants this table to `authenticated`, ║
+-- ║ which is what the app actually uses.                                     ║
+-- ║                                                                          ║
+-- ║ Partial fix only — it does not touch the eight tables below.             ║
 -- ╚══════════════════════════════════════════════════════════════════════════╝
 
 drop policy if exists "Allow all access to business_settings for now"
@@ -21,14 +29,24 @@ drop policy if exists "Allow all access to business_settings for now"
 
 
 -- ╔══════════════════════════════════════════════════════════════════════════╗
--- ║ STAGE 2 — the real fix. Test before running against production.          ║
+-- ║ STAGE B — the real fix for the public data hole.                         ║
+-- ║                                                                          ║
+-- ║ These eight tables currently have NO policies, and row level security is ║
+-- ║ off, so anyone holding the anon key (which ships in your JS bundle) can  ║
+-- ║ read and write every organization's rows.                                ║
+-- ║                                                                          ║
+-- ║ Does NOT touch signup. Signup writes only to organizations,              ║
+-- ║ organization_members and business_settings — none of which are here.     ║
+-- ║                                                                          ║
+-- ║ Should be transparent to the app: it already filters every query by      ║
+-- ║ organization_id, so a legitimate user sees exactly what they see today.  ║
 -- ╚══════════════════════════════════════════════════════════════════════════╝
 
--- Membership test used by every policy below.
+-- Membership test used by the policies.
 --
 -- SECURITY DEFINER matters: it lets this read organization_members without
--- being subject to that table's own RLS, which would otherwise recurse
--- infinitely when the policy on organization_members calls it.
+-- being subject to that table's own RLS, which would otherwise recurse when a
+-- policy on organization_members calls it.
 create or replace function public.is_org_member(p_organization_id uuid)
 returns boolean
 language sql
@@ -45,12 +63,6 @@ as $$
 $$;
 
 revoke execute on function public.is_org_member(uuid) from anon;
-
-
--- ── The eight unprotected tables ────────────────────────────────────────────
--- Each carries organization_id, so one policy shape covers all of them. The
--- app already filters by organization_id on every query, so a correctly
--- configured user sees exactly what they see today.
 
 do $$
 declare
@@ -84,11 +96,21 @@ begin
 end
 $$;
 
+-- ── Verify Stage B ──────────────────────────────────────────────────────────
+-- Re-run the anonymous probe; every one of the eight should return 0 rows.
+-- Then log in and confirm work orders, challans and invoices all still load.
 
--- ── organizations ───────────────────────────────────────────────────────────
--- Currently: any authenticated user can read, rename or delete ANY
--- organization. Replaced with membership-scoped access, plus an insert path so
--- signup can still create one.
+
+-- ╔══════════════════════════════════════════════════════════════════════════╗
+-- ║ STAGE C — tightens the org/membership tables. TEST SIGNUP AFTER.          ║
+-- ║                                                                          ║
+-- ║ Fixes a privilege escalation: the current organization_members policy is ║
+-- ║ ALL / authenticated / USING true, so anyone who can create an account    ║
+-- ║ can insert themselves into any organization and read its data.           ║
+-- ║                                                                          ║
+-- ║ This stage changes signup, so it needs the client change below and a     ║
+-- ║ real signup test.                                                        ║
+-- ╚══════════════════════════════════════════════════════════════════════════╝
 
 drop policy if exists "Authenticated users can manage organizations"
   on public.organizations;
@@ -99,15 +121,6 @@ create policy "members access their organization" on public.organizations
   using (public.is_org_member(id))
   with check (public.is_org_member(id));
 
--- Deliberately NO plain insert policy for organizations. Signup goes through
--- the function below instead — see the note on the signup flow.
-
-
--- ── organization_members ────────────────────────────────────────────────────
--- Currently: any authenticated user can add themselves to ANY organization, or
--- remove other people's memberships. That is the most serious of the policy
--- bugs, because it is a path from "has an account" to "has your data".
-
 drop policy if exists "Authenticated users can manage organization members"
   on public.organization_members;
 
@@ -117,12 +130,9 @@ create policy "read memberships of own organizations"
   to authenticated
   using (user_id = auth.uid() or public.is_org_member(organization_id));
 
--- No insert policy: membership is granted only by the signup function below.
--- Joining an existing organization needs an invite flow, which does not exist
--- yet. Leaving inserts closed is the safe default until it does.
-
-
--- ── business_settings ───────────────────────────────────────────────────────
+-- No insert policy on either table: new organizations are created only through
+-- the function below. Joining an existing organization needs an invite flow,
+-- which does not exist yet — leaving inserts closed is the safe default.
 
 drop policy if exists "Authenticated users can manage business settings"
   on public.business_settings;
@@ -134,15 +144,15 @@ create policy "org members manage business settings" on public.business_settings
   with check (public.is_org_member(organization_id));
 
 
--- ── Signup ──────────────────────────────────────────────────────────────────
--- Once RLS is on, the current signup flow breaks: AuthContext does
--- `.insert(...).select().single()` on organizations, and RETURNING requires a
--- SELECT policy, which cannot pass because the user is not a member yet.
+-- Signup, as one atomic operation.
 --
--- This function replaces those three separate client-side inserts. It also
--- fixes a pre-existing bug: today, if any of the three fails, the user is left
--- with an account and no organization and the app silently shows nothing.
--- Here all three either succeed together or none do.
+-- Needed because once RLS is on, AuthContext's `.insert(...).select().single()`
+-- on organizations breaks: RETURNING requires a SELECT policy, which cannot
+-- pass when the user is not a member yet.
+--
+-- This also fixes an existing bug — today the three inserts are separate, so a
+-- failure part-way leaves a user with an account, no organization, and an app
+-- that silently shows nothing.
 
 create or replace function public.create_organization_with_owner(
   p_name text,
@@ -185,8 +195,8 @@ $$;
 
 revoke execute on function public.create_organization_with_owner(text, text) from anon;
 
--- Corresponding client change in src/context/AuthContext.tsx — replace the
--- three inserts with:
+-- Matching client change in src/context/AuthContext.tsx — replace the three
+-- inserts with:
 --
 --   const { error } = await supabase.rpc("create_organization_with_owner", {
 --     p_name: businessName,
@@ -195,25 +205,11 @@ revoke execute on function public.create_organization_with_owner(text, text) fro
 
 
 -- ╔══════════════════════════════════════════════════════════════════════════╗
--- ║ STAGE 3 — drop the superseded pre-multi-tenant functions.                ║
--- ║ The app calls none of these. Dropping a specific overload leaves the      ║
--- ║ current one untouched.                                                    ║
+-- ║ STAGE D — drop the superseded pre-multi-tenant function overloads.       ║
+-- ║ The app calls none of these. Dropping a specific overload leaves the     ║
+-- ║ current one untouched.                                                   ║
 -- ╚══════════════════════════════════════════════════════════════════════════╝
 
 drop function if exists public.get_billable_dc_items(uuid);
 drop function if exists public.create_work_order_with_items(text, date, uuid, text, jsonb);
 drop function if exists public.create_delivery_challan_with_effects(text, date, uuid, text, text, jsonb);
-
-
--- ╔══════════════════════════════════════════════════════════════════════════╗
--- ║ VERIFY — after stage 2, this should return zero rows.                    ║
--- ╚══════════════════════════════════════════════════════════════════════════╝
---
--- select c.relname, c.relrowsecurity
--- from pg_class c
--- join pg_namespace n on n.oid = c.relnamespace
--- where n.nspname = 'public'
---   and c.relkind = 'r'
---   and c.relrowsecurity = false;
---
--- And re-run the anonymous probe — every table should return 0 rows.

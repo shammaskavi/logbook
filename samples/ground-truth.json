@@ -1,0 +1,179 @@
+{
+  "_readme": [
+    "Scoring key for the extraction test. Save the five slip photos into",
+    "samples/work-orders/ using the `image` filename on each entry, run whichever",
+    "provider you're evaluating, save its JSON to samples/output/<id>.json, then:",
+    "    node scripts/score-extraction.mjs",
+    "",
+    "Entries marked needs_human_ground_truth are ones Claude could NOT read",
+    "reliably. Please fill those in from the paper — you know what the items",
+    "should say. Until then the scorer skips their item comparison and only",
+    "checks the header fields.",
+    "",
+    "Deliberately excluded: GSTINs, bank account numbers, IFSC codes and phone",
+    "numbers that appear on these slips. We don't extract them, and they belong",
+    "to your customers — no reason to commit them to a git repo."
+  ],
+  "slips": [
+    {
+      "id": "varalakshmi-1054",
+      "image": "varalakshmi-1054.jpg",
+      "difficulty": "hard",
+      "why": "Handwritten cursive items with ditto marks, two struck-out quantities, inline arithmetic ('129 = 66+63'), and numbers straddling the UOM and Qty columns. The written total (669) does not reconcile with any reading of the item quantities. Quantities confirmed by the user: all nine numbers are quantities and sum to the written total of 669. 149 and 128 are valid despite appearing struck through.",
+      "needs_human_ground_truth": false,
+      "party_name": "Varalakshmi Creations",
+      "work_order_number": "1054",
+      "received_date": "2026-08-13",
+      "document_total_quantity": 669,
+      "items": [
+        {
+          "raw_text": null,
+          "quantity": 149,
+          "expected_flags": [],
+          "note": "Reads as \"art visc.. fold\" or similar — exact wording not scoreable, it maps to the nearest job work."
+        },
+        {
+          "raw_text": null,
+          "quantity": 9,
+          "expected_flags": []
+        },
+        {
+          "raw_text": null,
+          "quantity": 14,
+          "expected_flags": []
+        },
+        {
+          "raw_text": null,
+          "quantity": 129,
+          "expected_flags": []
+        },
+        {
+          "raw_text": null,
+          "quantity": 135,
+          "expected_flags": []
+        },
+        {
+          "raw_text": null,
+          "quantity": 46,
+          "expected_flags": []
+        },
+        {
+          "raw_text": null,
+          "quantity": 128,
+          "expected_flags": []
+        },
+        {
+          "raw_text": null,
+          "quantity": 22,
+          "expected_flags": []
+        },
+        {
+          "raw_text": null,
+          "quantity": 37,
+          "expected_flags": []
+        }
+      ],
+      "score_text": false
+    },
+    {
+      "id": "kiva-2627-381",
+      "image": "kiva-2627-381.jpg",
+      "difficulty": "easy",
+      "why": "Fully computer-generated. The only handwriting is a red correction replacing the printed process.",
+      "needs_human_ground_truth": false,
+      "party_name": "Kiva Saree World",
+      "work_order_number": "KSW-MO-2627-381",
+      "received_date": "2026-08-13",
+      "document_total_quantity": 14,
+      "items": [
+        {
+          "raw_text": "Double deco gm",
+          "quantity": 14,
+          "expected_flags": [
+            "handwritten_correction"
+          ],
+          "note": "Printed process is GUM FINISHING; red handwriting replaces it. Accepting either text as correct, but the correction should be noticed."
+        }
+      ]
+    },
+    {
+      "id": "uttam-2357",
+      "image": "uttam-2357.jpg",
+      "difficulty": "medium",
+      "why": "Printed form, legible handwritten items. Quantities are unambiguous and the total confirms them. Date confirmed from the paper as 24/03/25 — the month digit reads as 3, not 8.",
+      "needs_human_ground_truth": false,
+      "party_name": "Uttam Silks & Sarees",
+      "work_order_number": "2357",
+      "received_date": "2025-03-24",
+      "document_total_quantity": 4,
+      "items": [
+        {
+          "raw_text": "D/s pattani",
+          "quantity": 2,
+          "expected_flags": []
+        },
+        {
+          "raw_text": "kanchi butta kanchi fold",
+          "quantity": 1,
+          "expected_flags": []
+        },
+        {
+          "raw_text": "muniya pattani gutaka fold",
+          "quantity": 1,
+          "expected_flags": []
+        }
+      ]
+    },
+    {
+      "id": "sl-silk-house-85",
+      "image": "sl-silk-house-85.jpg",
+      "difficulty": "medium",
+      "why": "Entirely handwritten on lined paper, but clear hand and the total confirms the two quantities. Addressed to 'Ameer Finishing', an alias for the job worker, which must not be read as the party.",
+      "needs_human_ground_truth": false,
+      "party_name": "S.L Silk House",
+      "work_order_number": "85",
+      "received_date": "2026-08-13",
+      "document_total_quantity": 52,
+      "items": [
+        {
+          "raw_text": "pure mix and full mix gold",
+          "quantity": 30,
+          "expected_flags": []
+        },
+        {
+          "raw_text": "pure mix gold",
+          "quantity": 22,
+          "expected_flags": []
+        }
+      ]
+    },
+    {
+      "id": "govardan-31",
+      "image": "govardan-31.jpg",
+      "difficulty": "hard",
+      "why": "Item descriptions are physically destroyed — a ring-binder hole is punched through them and a torn strip covers the leading characters. Quantities remain readable and the total confirms them. Date is illegible to the user as well, so it is excluded from scoring rather than scored against a guess.",
+      "needs_human_ground_truth": true,
+      "party_name": "Govardan Silks",
+      "work_order_number": "31",
+      "received_date": null,
+      "document_total_quantity": 21,
+      "items": [
+        {
+          "quantity": 8,
+          "expected_flags": [
+            "illegible"
+          ],
+          "note": "Partially readable as '...mix Brocade Br'. Please fill in the correct text."
+        },
+        {
+          "quantity": 13,
+          "expected_flags": [
+            "illegible"
+          ],
+          "note": "Partially readable as '...mix Brocade cut/f Br'. Please fill in the correct text."
+        }
+      ],
+      "score_text": false
+    }
+  ]
+}

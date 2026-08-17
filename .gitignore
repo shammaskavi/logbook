@@ -25,3 +25,8 @@ dist-ssr
 
 # Supabase CLI local state
 supabase/.temp/
+
+# Sample slip photos and provider outputs — these are customer documents
+# carrying GSTINs and bank details. Keep them local.
+samples/work-orders/
+samples/output/
