@@ -1,8 +1,11 @@
 {
+  "//": "resolveJsonModule and esModuleInterop below are required by the api/ functions, which import src/lib/extraction/contract.json. Vercel compiles api/ against THIS file's compilerOptions, not tsconfig.app.json — removing them breaks the deployed function while `vite build` still passes locally. Guarded by `npm run typecheck`.",
   "files": [],
   "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }],
   "compilerOptions": {
     "baseUrl": ".",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
     "paths": {
       "@/*": ["./src/*"]
     },
