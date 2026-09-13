@@ -174,11 +174,19 @@ export default function ManualDCForm() {
             <Popover>
               <PopoverTrigger asChild>
                 <Button
+                  id="manual-dc-date-trigger"
+                  tabIndex={0}
                   variant="outline"
                   className={cn(
                     "w-full justify-start text-left font-normal",
                     !generatedDate && "text-muted-foreground"
                   )}
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab" && !e.shiftKey) {
+                      e.preventDefault();
+                      document.getElementById("manual-dc-party-select")?.focus();
+                    }
+                  }}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {generatedDate ? format(generatedDate, "dd - MMM - yyyy") : "DD - MMM - YYYY"}
@@ -198,8 +206,27 @@ export default function ManualDCForm() {
 
           <div>
             <Label className="mb-2 block text-sm font-medium">Party Name</Label>
-            <Select value={partyId} onValueChange={setPartyId}>
-              <SelectTrigger className="w-full">
+            <Select
+              value={partyId}
+              onValueChange={(val) => {
+                setPartyId(val);
+                setTimeout(() => document.getElementById("manual-dc-number-input")?.focus(), 50);
+              }}
+            >
+              <SelectTrigger
+                id="manual-dc-party-select"
+                tabIndex={0}
+                className="w-full"
+                onKeyDown={(e) => {
+                  if (e.key === "Tab" && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById("manual-dc-number-input")?.focus();
+                  } else if (e.key === "Tab" && e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById("manual-dc-date-trigger")?.focus();
+                  }
+                }}
+              >
                 <SelectValue placeholder="Select Party" />
               </SelectTrigger>
               <SelectContent>
@@ -215,18 +242,38 @@ export default function ManualDCForm() {
           <div>
             <Label className="mb-2 block text-sm font-medium">DC Number</Label>
             <Input
+              id="manual-dc-number-input"
               placeholder="Enter DC Number"
               value={dcNumber}
               onChange={e => setDcNumber(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                  e.preventDefault();
+                  document.getElementById("manual-dc-transporter-input")?.focus();
+                } else if (e.key === "Tab" && e.shiftKey) {
+                  e.preventDefault();
+                  document.getElementById("manual-dc-party-select")?.focus();
+                }
+              }}
             />
           </div>
 
           <div>
             <Label className="mb-2 block text-sm font-medium">Transporter Name</Label>
             <Input
+              id="manual-dc-transporter-input"
               placeholder="Enter Transporter Name (optional)"
               value={transporterName}
               onChange={e => setTransporterName(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                  e.preventDefault();
+                  document.getElementById("manual-dc-wo-0")?.focus();
+                } else if (e.key === "Tab" && e.shiftKey) {
+                  e.preventDefault();
+                  document.getElementById("manual-dc-number-input")?.focus();
+                }
+              }}
             />
           </div>
         </div>
@@ -248,9 +295,23 @@ export default function ManualDCForm() {
             <div className="flex flex-col gap-1">
               <span className="text-xs text-muted-foreground md:hidden">Work Order No.</span>
               <Input
+                id={`manual-dc-wo-${index}`}
                 placeholder="WO Number"
                 value={item.manual_wo_number}
                 onChange={e => updateItem(index, "manual_wo_number", e.target.value)}
+                onKeyDown={(e) => {
+                  if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                    e.preventDefault();
+                    document.getElementById(`manual-dc-jobwork-${index}`)?.focus();
+                  } else if (e.key === "Tab" && e.shiftKey) {
+                    e.preventDefault();
+                    if (index === 0) {
+                      document.getElementById("manual-dc-transporter-input")?.focus();
+                    } else {
+                      document.getElementById(`manual-dc-quantity-${index - 1}`)?.focus();
+                    }
+                  }
+                }}
                 className="w-full md:w-[180px]"
               />
             </div>
@@ -259,9 +320,25 @@ export default function ManualDCForm() {
               <span className="text-xs text-muted-foreground md:hidden">Job Work</span>
               <Select
                 value={item.job_work_type_id}
-                onValueChange={v => updateItem(index, "job_work_type_id", v)}
+                onValueChange={v => {
+                  updateItem(index, "job_work_type_id", v);
+                  setTimeout(() => document.getElementById(`manual-dc-quantity-${index}`)?.focus(), 50);
+                }}
               >
-                <SelectTrigger className="w-full">
+                <SelectTrigger
+                  id={`manual-dc-jobwork-${index}`}
+                  tabIndex={0}
+                  className="w-full"
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab" && !e.shiftKey) {
+                      e.preventDefault();
+                      document.getElementById(`manual-dc-quantity-${index}`)?.focus();
+                    } else if (e.key === "Tab" && e.shiftKey) {
+                      e.preventDefault();
+                      document.getElementById(`manual-dc-wo-${index}`)?.focus();
+                    }
+                  }}
+                >
                   <SelectValue placeholder="Select Job Work" />
                 </SelectTrigger>
                 <SelectContent>
@@ -275,16 +352,33 @@ export default function ManualDCForm() {
             <div className="flex flex-col gap-1 md:items-start">
               <span className="text-xs text-muted-foreground md:hidden">Quantity</span>
               <Input
+                id={`manual-dc-quantity-${index}`}
                 type="number"
                 placeholder="Add Quantity"
                 value={item.quantity || ""}
                 onChange={e => updateItem(index, "quantity", parseInt(e.target.value) || 0)}
+                onKeyDown={e => {
+                  if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                    e.preventDefault();
+                    if (index === items.length - 1) {
+                      addItem();
+                      setTimeout(() => document.getElementById(`manual-dc-wo-${index + 1}`)?.focus(), 50);
+                    } else {
+                      document.getElementById(`manual-dc-wo-${index + 1}`)?.focus();
+                    }
+                  } else if (e.key === "Tab" && e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById(`manual-dc-jobwork-${index}`)?.focus();
+                  }
+                }}
                 className="w-full md:w-[140px]"
                 min={1}
               />
             </div>
 
             <button
+              type="button"
+              tabIndex={-1}
               onClick={() => removeItem(index)}
               className="self-end md:self-auto text-destructive hover:text-destructive/80 transition-colors p-2"
             >
@@ -295,6 +389,7 @@ export default function ManualDCForm() {
 
         <div className="flex items-center justify-between px-6 py-3">
           <button
+            type="button"
             onClick={addItem}
             className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors font-medium"
           >

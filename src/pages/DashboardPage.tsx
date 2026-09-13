@@ -266,7 +266,7 @@ export default function DashboardPage() {
                             value={summary.unbilled_amount}
                             icon={FileText}
                             accent="blue"
-                            onClick={() => navigate("/")}
+                            onClick={() => navigate("/dc")}
                         />
                         <MetricCard
                             title="Active Customers"

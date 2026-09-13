@@ -75,7 +75,7 @@ export function DCPreview({
 
   const logoUrl = businessSettings?.logo_url
     ? supabase.storage.from("business-logos").getPublicUrl(businessSettings.logo_url)
-        .data.publicUrl
+      .data.publicUrl
     : null;
 
   // ── Reusable blocks ──────────────────────────────────────────────────────

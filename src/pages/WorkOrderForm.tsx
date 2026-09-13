@@ -125,6 +125,8 @@ export default function WorkOrderForm() {
     }));
   };
 
+  const totalQuantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+
   const handleSave = async () => {
     if (!receivedDate) { toast({ title: "Received date is required", variant: "destructive" }); return; }
     if (!workOrderNumber.trim()) { toast({ title: "Work order number is required", variant: "destructive" }); return; }
@@ -175,7 +177,7 @@ export default function WorkOrderForm() {
   };
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto">
       <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold">{isEdit ? "Edit Work Order" : "New Work Order"}</h1>
         <div className="flex flex-col gap-3 sm:flex-row">
@@ -197,13 +199,24 @@ export default function WorkOrderForm() {
         />
       )}
 
-      <div className="bg-card rounded-lg border border-border p-6 mb-6">
+      <div className="bg-card rounded-lg border border-border p-4 md:p-6 mb-6">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           <div>
             <Label className="mb-2 block text-sm font-medium">Received Date</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !receivedDate && "text-muted-foreground")}>
+                <Button
+                  id="wo-date-trigger"
+                  tabIndex={0}
+                  variant="outline"
+                  className={cn("w-full justify-start text-left font-normal", !receivedDate && "text-muted-foreground")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab" && !e.shiftKey) {
+                      e.preventDefault();
+                      document.getElementById("wo-party-select")?.focus();
+                    }
+                  }}
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {receivedDate ? format(receivedDate, "dd - MMM - yyyy") : "DD - MMM - YYYY"}
                 </Button>
@@ -217,8 +230,27 @@ export default function WorkOrderForm() {
           <div>
             <Label className="mb-2 block text-sm font-medium">Party Name</Label>
             <div className="flex gap-2">
-              <Select value={partyId} onValueChange={setPartyId}>
-                <SelectTrigger className="w-full">
+              <Select
+                value={partyId}
+                onValueChange={(val) => {
+                  setPartyId(val);
+                  setTimeout(() => document.getElementById("wo-number-input")?.focus(), 50);
+                }}
+              >
+                <SelectTrigger
+                  id="wo-party-select"
+                  tabIndex={0}
+                  className="w-full"
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab" && !e.shiftKey) {
+                      e.preventDefault();
+                      document.getElementById("wo-number-input")?.focus();
+                    } else if (e.key === "Tab" && e.shiftKey) {
+                      e.preventDefault();
+                      document.getElementById("wo-date-trigger")?.focus();
+                    }
+                  }}
+                >
                   <SelectValue placeholder="Select Party Name" />
                 </SelectTrigger>
                 <SelectContent>
@@ -233,6 +265,7 @@ export default function WorkOrderForm() {
               <Button
                 variant="outline"
                 size="icon"
+                tabIndex={-1}
                 onClick={() => setPartyModalOpen(true)}
                 title="Add new party"
               >
@@ -243,7 +276,21 @@ export default function WorkOrderForm() {
 
           <div>
             <Label className="mb-2 block text-sm font-medium">Work Order Number</Label>
-            <Input placeholder="Enter Number" value={workOrderNumber} onChange={e => setWorkOrderNumber(e.target.value)} />
+            <Input
+              id="wo-number-input"
+              placeholder="Enter Number"
+              value={workOrderNumber}
+              onChange={e => setWorkOrderNumber(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                  e.preventDefault();
+                  document.getElementById("wo-jobwork-0")?.focus();
+                } else if (e.key === "Tab" && e.shiftKey) {
+                  e.preventDefault();
+                  document.getElementById("wo-party-select")?.focus();
+                }
+              }}
+            />
           </div>
         </div>
       </div>
@@ -256,12 +303,37 @@ export default function WorkOrderForm() {
         </div>
 
         {items.map((item, idx) => (
-          <div key={item.id || idx} className="flex flex-col gap-3 px-6 py-4 border-b border-border md:grid md:grid-cols-[1fr_200px_60px] md:items-center md:gap-0">
+          <div key={item.id || idx} className="flex flex-col gap-3 px-4 md:px-6 py-4 border-b border-border md:grid md:grid-cols-[1fr_200px_60px] md:items-center md:gap-0">
             <div className="flex flex-col gap-1 md:pr-4">
               <span className="text-xs text-muted-foreground md:hidden">Job Work</span>
               <div className="flex gap-2">
-                <Select value={item.job_work_type_id || ""} onValueChange={v => updateItem(idx, "job_work_type_id", v)}>
-                  <SelectTrigger className="w-full"><SelectValue placeholder="Select Job Work" /></SelectTrigger>
+                <Select
+                  value={item.job_work_type_id || ""}
+                  onValueChange={v => {
+                    updateItem(idx, "job_work_type_id", v);
+                    setTimeout(() => document.getElementById(`wo-quantity-${idx}`)?.focus(), 50);
+                  }}
+                >
+                  <SelectTrigger
+                    id={`wo-jobwork-${idx}`}
+                    tabIndex={0}
+                    className="w-full"
+                    onKeyDown={(e) => {
+                      if (e.key === "Tab" && !e.shiftKey) {
+                        e.preventDefault();
+                        document.getElementById(`wo-quantity-${idx}`)?.focus();
+                      } else if (e.key === "Tab" && e.shiftKey) {
+                        e.preventDefault();
+                        if (idx === 0) {
+                          document.getElementById("wo-number-input")?.focus();
+                        } else {
+                          document.getElementById(`wo-quantity-${idx - 1}`)?.focus();
+                        }
+                      }
+                    }}
+                  >
+                    <SelectValue placeholder="Select Job Work" />
+                  </SelectTrigger>
                   <SelectContent>
                     {activeJobTypes.map(j => <SelectItem key={j.id} value={j.id}>{j.name}</SelectItem>)}
                   </SelectContent>
@@ -273,6 +345,7 @@ export default function WorkOrderForm() {
                   <Button
                     variant="outline"
                     size="icon"
+                    tabIndex={-1}
                     className="shrink-0"
                     title={`Add "${item.extracted_text}" as a job work`}
                     onClick={() => setJobWorkModal({ index: idx, name: item.extracted_text! })}
@@ -293,23 +366,49 @@ export default function WorkOrderForm() {
             <div className="flex flex-col gap-1 md:items-start">
               <span className="text-xs text-muted-foreground md:hidden">Quantity</span>
               <Input
+                id={`wo-quantity-${idx}`}
                 type="number"
                 placeholder="Add Quantity"
                 value={item.quantity || ""}
                 onChange={e => updateItem(idx, "quantity", parseInt(e.target.value) || 0)}
+                onKeyDown={e => {
+                  if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                    e.preventDefault();
+                    if (idx === items.length - 1) {
+                      addItem();
+                      setTimeout(() => document.getElementById(`wo-jobwork-${idx + 1}`)?.focus(), 50);
+                    } else {
+                      document.getElementById(`wo-jobwork-${idx + 1}`)?.focus();
+                    }
+                  } else if (e.key === "Tab" && e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById(`wo-jobwork-${idx}`)?.focus();
+                  }
+                }}
                 className="w-full md:w-40"
                 min={1}
               />
             </div>
-            <button onClick={() => removeItem(idx)} className="self-end md:self-auto text-destructive hover:text-destructive/80 transition-colors p-2">
+            <button
+              type="button"
+              tabIndex={-1}
+              onClick={() => removeItem(idx)}
+              className="self-end md:self-auto text-destructive hover:text-destructive/80 transition-colors p-2"
+            >
               <Trash2 className="w-4 h-4" />
             </button>
           </div>
         ))}
 
-        <button onClick={addItem} className="flex items-center gap-2 px-6 py-3 text-sm text-primary hover:text-primary/80 transition-colors font-medium">
-          <Plus className="w-4 h-4" /> Add New Item
-        </button>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 md:px-6 py-3.5 bg-muted/20 gap-3 border-t border-border">
+          <button onClick={addItem} type="button" className="flex items-center gap-2 text-sm text-primary hover:text-primary/80 transition-colors font-medium">
+            <Plus className="w-4 h-4" /> Add New Item
+          </button>
+          <div className="text-sm text-muted-foreground font-medium flex items-center gap-2 self-end sm:self-auto">
+            <span>Total Quantity:</span>
+            <span className="text-foreground font-bold text-base tabular-nums">{totalQuantity}</span>
+          </div>
+        </div>
       </div>
 
       <JobWorkFormModal

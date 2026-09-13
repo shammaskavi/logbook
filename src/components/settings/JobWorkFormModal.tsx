@@ -110,13 +110,21 @@ export default function JobWorkFormModal({
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit();
+                    }}
+                    className="space-y-4"
+                >
                     <div>
                         <Label className="text-sm font-medium">Job Work Name *</Label>
                         <Input
+                            id="jobwork-modal-name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Enter job work name"
+                            autoFocus
                         />
                     </div>
 
@@ -132,13 +140,14 @@ export default function JobWorkFormModal({
 
                     <div className="flex justify-end gap-2 pt-2">
                         <Button
+                            type="button"
                             variant="outline"
                             onClick={onClose}
                             disabled={isSubmitting}
                         >
                             Cancel
                         </Button>
-                        <Button onClick={handleSubmit} disabled={isSubmitting}>
+                        <Button type="submit" disabled={isSubmitting}>
                             {isSubmitting
                                 ? "Saving..."
                                 : mode === "create"
@@ -146,7 +155,7 @@ export default function JobWorkFormModal({
                                     : "Update"}
                         </Button>
                     </div>
-                </div>
+                </form>
             </DialogContent>
         </Dialog>
     );

@@ -222,7 +222,18 @@ export default function DCForm() {
             <Label className="mb-2 block text-sm font-medium">Generated Date</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !generatedDate && "text-muted-foreground")}>
+                <Button
+                  id="dc-date-trigger"
+                  tabIndex={0}
+                  variant="outline"
+                  className={cn("w-full justify-start text-left font-normal", !generatedDate && "text-muted-foreground")}
+                  onKeyDown={(e) => {
+                    if (e.key === "Tab" && !e.shiftKey) {
+                      e.preventDefault();
+                      document.getElementById("dc-party-select")?.focus();
+                    }
+                  }}
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {generatedDate ? format(generatedDate, "dd - MMM - yyyy") : "DD - MMM - YYYY"}
                 </Button>
@@ -234,8 +245,29 @@ export default function DCForm() {
           </div>
           <div>
             <Label className="mb-2 block text-sm font-medium">Party Name</Label>
-            <Select value={partyId} onValueChange={handlePartyChange}>
-              <SelectTrigger className="w-full"><SelectValue placeholder="Select Party" /></SelectTrigger>
+            <Select
+              value={partyId}
+              onValueChange={(val) => {
+                handlePartyChange(val);
+                setTimeout(() => document.getElementById("dc-number-input")?.focus(), 50);
+              }}
+            >
+              <SelectTrigger
+                id="dc-party-select"
+                tabIndex={0}
+                className="w-full"
+                onKeyDown={(e) => {
+                  if (e.key === "Tab" && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById("dc-number-input")?.focus();
+                  } else if (e.key === "Tab" && e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById("dc-date-trigger")?.focus();
+                  }
+                }}
+              >
+                <SelectValue placeholder="Select Party" />
+              </SelectTrigger>
               <SelectContent>
                 {parties.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
               </SelectContent>
@@ -245,11 +277,36 @@ export default function DCForm() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div>
             <Label className="mb-2 block text-sm font-medium">DC Number</Label>
-            <Input placeholder="Enter DC Number" value={dcNumber} onChange={e => setDcNumber(e.target.value)} />
+            <Input
+              id="dc-number-input"
+              placeholder="Enter DC Number"
+              value={dcNumber}
+              onChange={e => setDcNumber(e.target.value)}
+              onKeyDown={(e) => {
+                if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                  e.preventDefault();
+                  document.getElementById("dc-transporter-input")?.focus();
+                } else if (e.key === "Tab" && e.shiftKey) {
+                  e.preventDefault();
+                  document.getElementById("dc-party-select")?.focus();
+                }
+              }}
+            />
           </div>
           <div>
             <Label className="mb-2 block text-sm font-medium">Transporter Name</Label>
-            <Input placeholder="Enter Transporter Name (optional)" value={transporterName} onChange={e => setTransporterName(e.target.value)} />
+            <Input
+              id="dc-transporter-input"
+              placeholder="Enter Transporter Name (optional)"
+              value={transporterName}
+              onChange={e => setTransporterName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Tab" && e.shiftKey) {
+                  e.preventDefault();
+                  document.getElementById("dc-number-input")?.focus();
+                }
+              }}
+            />
           </div>
         </div>
       </div>
@@ -359,6 +416,7 @@ export default function DCForm() {
                 <div className="flex flex-col gap-1">
                   <span className="text-xs text-muted-foreground md:hidden">DC Quantity</span>
                   <Input
+                    id={`dc-quantity-${idx}`}
                     type="number"
                     min={1}
                     max={item.pending_quantity}
@@ -372,6 +430,21 @@ export default function DCForm() {
                         }
                       }))
                     }
+                    onKeyDown={(e) => {
+                      if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                        const next = document.getElementById(`dc-quantity-${idx + 1}`);
+                        if (next) {
+                          e.preventDefault();
+                          next.focus();
+                        }
+                      } else if (e.key === "Tab" && e.shiftKey) {
+                        const prev = document.getElementById(`dc-quantity-${idx - 1}`);
+                        if (prev) {
+                          e.preventDefault();
+                          prev.focus();
+                        }
+                      }
+                    }}
                     className="w-full md:w-32"
                   />
                 </div>

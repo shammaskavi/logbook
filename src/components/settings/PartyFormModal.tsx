@@ -103,19 +103,28 @@ export default function PartyFormModal({
                     </DialogTitle>
                 </DialogHeader>
 
-                <div className="space-y-4">
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSubmit();
+                    }}
+                    className="space-y-4"
+                >
                     <div>
                         <label className="text-sm font-medium">Party Name *</label>
                         <Input
+                            id="party-modal-name"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Enter party name"
+                            autoFocus
                         />
                     </div>
 
                     <div>
                         <label className="text-sm font-medium">Phone Number</label>
                         <Input
+                            id="party-modal-phone"
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             placeholder="Enter phone number"
@@ -125,6 +134,7 @@ export default function PartyFormModal({
                     <div>
                         <label className="text-sm font-medium">GST Number</label>
                         <Input
+                            id="party-modal-gstin"
                             value={gstin}
                             onChange={(e) => setGstin(e.target.value)}
                             placeholder="Enter GST number"
@@ -132,10 +142,10 @@ export default function PartyFormModal({
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+                        <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
                             Cancel
                         </Button>
-                        <Button onClick={handleSubmit} disabled={isSubmitting}>
+                        <Button type="submit" disabled={isSubmitting}>
                             {isSubmitting
                                 ? "Saving..."
                                 : mode === "create"
@@ -143,7 +153,7 @@ export default function PartyFormModal({
                                     : "Update"}
                         </Button>
                     </div>
-                </div>
+                </form>
             </DialogContent>
         </Dialog>
     );

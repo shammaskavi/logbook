@@ -229,14 +229,38 @@ export default function InvoiceForm() {
 
                     <div>
                         <Label className="mb-2 block text-sm font-medium">Invoice Number</Label>
-                        <Input value={invoiceNumber} onChange={(e) => setInvoiceNumber(e.target.value)} />
+                        <Input
+                            id="inv-number-input"
+                            value={invoiceNumber}
+                            onChange={(e) => setInvoiceNumber(e.target.value)}
+                            onKeyDown={(e) => {
+                                if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                                    e.preventDefault();
+                                    document.getElementById("inv-date-trigger")?.focus();
+                                }
+                            }}
+                        />
                     </div>
 
                     <div>
                         <Label className="mb-2 block text-sm font-medium">Invoice Date</Label>
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                                <Button
+                                    id="inv-date-trigger"
+                                    tabIndex={0}
+                                    variant="outline"
+                                    className="w-full justify-start text-left font-normal"
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Tab" && !e.shiftKey) {
+                                            e.preventDefault();
+                                            document.getElementById("inv-party-select")?.focus();
+                                        } else if (e.key === "Tab" && e.shiftKey) {
+                                            e.preventDefault();
+                                            document.getElementById("inv-number-input")?.focus();
+                                        }
+                                    }}
+                                >
                                     <CalendarIcon className="mr-2 h-4 w-4" />
                                     {format(new Date(invoiceDate), "dd MMM yyyy")}
                                 </Button>
@@ -254,8 +278,26 @@ export default function InvoiceForm() {
 
                     <div>
                         <Label className="mb-2 block text-sm font-medium">Party</Label>
-                        <Select value={partyId} onValueChange={setPartyId}>
-                            <SelectTrigger>
+                        <Select
+                            value={partyId}
+                            onValueChange={(val) => {
+                                setPartyId(val);
+                                setTimeout(() => document.getElementById("inv-gst-select")?.focus(), 50);
+                            }}
+                        >
+                            <SelectTrigger
+                                id="inv-party-select"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Tab" && !e.shiftKey) {
+                                        e.preventDefault();
+                                        document.getElementById("inv-gst-select")?.focus();
+                                    } else if (e.key === "Tab" && e.shiftKey) {
+                                        e.preventDefault();
+                                        document.getElementById("inv-date-trigger")?.focus();
+                                    }
+                                }}
+                            >
                                 <SelectValue placeholder="Select party" />
                             </SelectTrigger>
                             <SelectContent>
@@ -268,8 +310,35 @@ export default function InvoiceForm() {
 
                     <div>
                         <Label className="mb-2 block text-sm font-medium">GST Type</Label>
-                        <Select value={gstType} onValueChange={(val: InvoiceGSTType) => setGstType(val)}>
-                            <SelectTrigger>
+                        <Select
+                            value={gstType}
+                            onValueChange={(val: InvoiceGSTType) => {
+                                setGstType(val);
+                                if (val === "cgst_sgst") {
+                                    setTimeout(() => document.getElementById("inv-cgst-input")?.focus(), 50);
+                                } else if (val === "igst") {
+                                    setTimeout(() => document.getElementById("inv-igst-input")?.focus(), 50);
+                                }
+                            }}
+                        >
+                            <SelectTrigger
+                                id="inv-gst-select"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Tab" && !e.shiftKey) {
+                                        if (gstType === "cgst_sgst") {
+                                            e.preventDefault();
+                                            document.getElementById("inv-cgst-input")?.focus();
+                                        } else if (gstType === "igst") {
+                                            e.preventDefault();
+                                            document.getElementById("inv-igst-input")?.focus();
+                                        }
+                                    } else if (e.key === "Tab" && e.shiftKey) {
+                                        e.preventDefault();
+                                        document.getElementById("inv-party-select")?.focus();
+                                    }
+                                }}
+                            >
                                 <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
@@ -286,20 +355,37 @@ export default function InvoiceForm() {
                             <div>
                                 <Label className="mb-2 block text-sm font-medium">CGST %</Label>
                                 <Input
+                                    id="inv-cgst-input"
                                     type="number"
                                     min={0}
                                     value={cgstPercent}
                                     onChange={(e) => setCgstPercent(Number(e.target.value))}
+                                    onKeyDown={(e) => {
+                                        if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                                            e.preventDefault();
+                                            document.getElementById("inv-sgst-input")?.focus();
+                                        } else if (e.key === "Tab" && e.shiftKey) {
+                                            e.preventDefault();
+                                            document.getElementById("inv-gst-select")?.focus();
+                                        }
+                                    }}
                                 />
                             </div>
 
                             <div>
                                 <Label className="mb-2 block text-sm font-medium">SGST %</Label>
                                 <Input
+                                    id="inv-sgst-input"
                                     type="number"
                                     min={0}
                                     value={sgstPercent}
                                     onChange={(e) => setSgstPercent(Number(e.target.value))}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Tab" && e.shiftKey) {
+                                            e.preventDefault();
+                                            document.getElementById("inv-cgst-input")?.focus();
+                                        }
+                                    }}
                                 />
                             </div>
                         </>
@@ -309,10 +395,17 @@ export default function InvoiceForm() {
                         <div>
                             <Label className="mb-2 block text-sm font-medium">IGST %</Label>
                             <Input
+                                id="inv-igst-input"
                                 type="number"
                                 min={0}
                                 value={igstPercent}
                                 onChange={(e) => setIgstPercent(Number(e.target.value))}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Tab" && e.shiftKey) {
+                                        e.preventDefault();
+                                        document.getElementById("inv-gst-select")?.focus();
+                                    }
+                                }}
                             />
                         </div>
                     )}
@@ -366,7 +459,7 @@ export default function InvoiceForm() {
 
                                 {billableItems
                                     .filter((item: any) => step === 1 || rows[item.dc_item_id]?.selected)
-                                    .map((item: any) => {
+                                    .map((item: any, idx: number) => {
 
                                         const row = rows[item.dc_item_id] || {
                                             selected: false,
@@ -401,6 +494,7 @@ export default function InvoiceForm() {
 
                                                         <td className="py-3 w-36">
                                                             <Input
+                                                                id={`inv-qty-${idx}`}
                                                                 type="number"
                                                                 min={0}
                                                                 max={item.remaining_qty}
@@ -412,17 +506,42 @@ export default function InvoiceForm() {
                                                                         item.remaining_qty
                                                                     )
                                                                 }
+                                                                onKeyDown={(e) => {
+                                                                    if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                                                                        e.preventDefault();
+                                                                        document.getElementById(`inv-rate-${idx}`)?.focus();
+                                                                    } else if (e.key === "Tab" && e.shiftKey) {
+                                                                        const prev = document.getElementById(`inv-rate-${idx - 1}`);
+                                                                        if (prev) {
+                                                                            e.preventDefault();
+                                                                            prev.focus();
+                                                                        }
+                                                                    }
+                                                                }}
                                                             />
                                                         </td>
 
                                                         <td className="py-3 w-32">
                                                             <Input
+                                                                id={`inv-rate-${idx}`}
                                                                 type="number"
                                                                 min={0}
                                                                 value={row.rate}
                                                                 onChange={(e) =>
                                                                     updateRate(item.dc_item_id, Number(e.target.value))
                                                                 }
+                                                                onKeyDown={(e) => {
+                                                                    if ((e.key === "Tab" && !e.shiftKey) || e.key === "Enter") {
+                                                                        const next = document.getElementById(`inv-qty-${idx + 1}`);
+                                                                        if (next) {
+                                                                            e.preventDefault();
+                                                                            next.focus();
+                                                                        }
+                                                                    } else if (e.key === "Tab" && e.shiftKey) {
+                                                                        e.preventDefault();
+                                                                        document.getElementById(`inv-qty-${idx}`)?.focus();
+                                                                    }
+                                                                }}
                                                             />
                                                         </td>
 
