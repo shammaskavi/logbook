@@ -124,23 +124,23 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
   const letterhead = (pageIndex: number, pageCount: number) => (
     <div>
       <div
-        className="grid grid-cols-[56px_1fr_150px]"
+        className="grid grid-cols-[auto_1fr_190px]"
         style={{ borderBottom: `1px solid ${INK}` }}
       >
         <div
-          className="p-2 flex items-center justify-center"
-          style={{ borderRight: `1px solid ${INK}` }}
+          className="p-2 flex items-center justify-center aspect-square h-full"
+          style={{ borderRight: `1px solid ${INK}`, aspectRatio: "1 / 1" }}
         >
           {logoUrl ? (
             <img
               src={logoUrl}
               alt=""
               crossOrigin="anonymous"
-              style={{ width: 40, height: 40, objectFit: "contain" }}
+              style={{ width: "100%", height: "100%", maxWidth: 52, maxHeight: 52, objectFit: "contain" }}
             />
           ) : (
             <div
-              className="w-10 h-10 text-white flex items-center justify-center font-bold text-xl leading-none"
+              className="w-12 h-12 aspect-square text-white flex items-center justify-center font-bold text-2xl leading-none"
               style={{ background: INK }}
             >
               {businessInitials}
@@ -148,68 +148,68 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
           )}
         </div>
 
-        <div className="p-2">
+        <div className="p-2 flex flex-col justify-center">
           <div
-            className="text-lg font-bold uppercase leading-tight"
+            className="text-2xl font-bold uppercase leading-tight"
             style={{ color: INK }}
           >
             {businessName}
           </div>
-          <div className="text-[9px] text-slate-700 leading-tight mt-0.5 whitespace-pre-line">
+          <div className="text-[12px] text-slate-700 leading-normal mt-0.5 whitespace-pre-line">
             {businessAddress}
           </div>
         </div>
 
-        <div className="text-[9px]" style={{ borderLeft: `1px solid ${INK}` }}>
+        <div className="text-[12px] flex flex-col justify-center" style={{ borderLeft: `1px solid ${INK}` }}>
           {businessGstin && (
-            <div className="px-2 py-1" style={{ borderBottom: `1px solid ${INK}` }}>
+            <div className="px-3 py-1" style={{ borderBottom: `1px solid ${INK}` }}>
               <span className="font-semibold">GSTIN:</span> {businessGstin}
             </div>
           )}
-          <div className="px-2 py-1" style={{ borderBottom: `1px solid ${INK}` }}>
+          <div className="px-3 py-1" style={{ borderBottom: `1px solid ${INK}` }}>
             <span className="font-semibold">PAN:</span> {businessPan}
           </div>
-          <div className="px-2 py-1">
+          <div className="px-3 py-1">
             <span className="font-semibold">Ph:</span> {businessPhone}
           </div>
         </div>
       </div>
 
       <div
-        className="text-white text-center font-bold py-1 uppercase tracking-wide"
+        className="text-white text-center font-bold py-1.5 uppercase tracking-widest text-[13px]"
         style={{ background: INK, borderBottom: `1px solid ${INK}` }}
       >
         Tax Invoice
       </div>
 
       <div
-        className="grid grid-cols-[1.8fr_1.2fr_1fr] text-[10px]"
+        className="grid grid-cols-[1.8fr_1.2fr_1fr] text-[12.5px]"
         style={{ borderBottom: `1px solid ${INK}` }}
       >
-        <div className="px-2 py-2" style={{ borderRight: `1px solid ${INK}` }}>
+        <div className="px-3 py-2" style={{ borderRight: `1px solid ${INK}` }}>
           <div>
             <span className="font-semibold">To:</span>{" "}
-            <span className="font-bold uppercase">{invoice?.party_name || "-"}</span>
+            <span className="font-bold uppercase text-[13px]">{invoice?.party_name || "-"}</span>
           </div>
           {invoice?.party_gstin && (
-            <div className="mt-0.5">
+            <div className="mt-0.5 text-[11px]">
               <span className="font-semibold">GSTIN:</span> {invoice.party_gstin}
             </div>
           )}
         </div>
 
-        <div className="px-2 py-2" style={{ borderRight: `1px solid ${INK}` }}>
+        <div className="px-3 py-2" style={{ borderRight: `1px solid ${INK}` }}>
           <span className="font-semibold">Invoice No:</span>{" "}
-          <span className="font-bold break-all leading-tight" style={{ color: INK }}>
+          <span className="font-bold break-all leading-tight text-[13px]" style={{ color: INK }}>
             {displayInvoiceNo}
           </span>
         </div>
 
-        <div className="px-2 py-2 flex flex-col justify-between">
+        <div className="px-3 py-2 flex flex-col justify-between">
           <div>
             <span className="font-semibold">Date:</span> {displayDate}
           </div>
-          <div className="text-[8px] text-slate-500 font-semibold mt-1">
+          <div className="text-[10px] text-slate-500 font-semibold mt-1">
             Page {pageIndex + 1} of {pageCount}
           </div>
         </div>
@@ -219,39 +219,39 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
 
   const tableHead = (
     <thead>
-      <tr className="uppercase font-bold" style={{ background: "#F5E7D9", color: INK }}>
+      <tr className="uppercase font-bold text-[12px]" style={{ background: "#F5E7D9", color: INK }}>
         <th
-          className="w-[10%] px-2 py-[4px] text-left"
+          className="w-[10%] px-3 py-2 text-left"
           style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}
         >
           WO No.
         </th>
         <th
-          className="w-[10%] px-2 py-[4px] text-left"
+          className="w-[10%] px-3 py-2 text-left"
           style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}
         >
           DC No.
         </th>
         <th
-          className="w-[44%] px-2 py-[4px] text-left"
+          className="w-[44%] px-3 py-2 text-left"
           style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}
         >
           Particulars
         </th>
         <th
-          className="w-[12%] px-2 py-[4px] text-right"
+          className="w-[12%] px-3 py-2 text-right"
           style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}
         >
           Quantity
         </th>
         <th
-          className="w-[8%] px-2 py-[4px] text-right"
+          className="w-[8%] px-3 py-2 text-right"
           style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}
         >
           Rate
         </th>
         <th
-          className="w-[16%] px-2 py-[4px] text-right"
+          className="w-[16%] px-3 py-2 text-right"
           style={{ borderBottom: `1px solid ${INK}` }}
         >
           Amount
@@ -263,36 +263,36 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
   const itemRow = (item: any, key: number, striped: boolean) => (
     <tr key={key} className={striped ? "bg-slate-50" : "bg-white"}>
       <td
-        className="px-2 py-[3px] align-top"
+        className="px-3 py-2 align-top font-medium"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         {item?.wo_number || "-"}
       </td>
       <td
-        className="px-2 py-[3px] align-top"
+        className="px-3 py-2 align-top font-medium"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         {item?.dc_number || "-"}
       </td>
       <td
-        className="px-2 py-[3px] align-top break-words"
+        className="px-3 py-2 align-top break-words font-medium"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         {item?.particulars || "-"}
       </td>
       <td
-        className="px-2 py-[3px] text-right align-top tabular-nums"
+        className="px-3 py-2 text-right align-top tabular-nums"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         {Number(item?.quantity || 0)}
       </td>
       <td
-        className="px-2 py-[3px] text-right align-top tabular-nums"
+        className="px-3 py-2 text-right align-top tabular-nums"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         {money(item?.rate)}
       </td>
-      <td className="px-2 py-[3px] text-right align-top tabular-nums font-semibold">
+      <td className="px-3 py-2 text-right align-top tabular-nums font-bold">
         {money(lineAmount(item))}
       </td>
     </tr>
@@ -312,17 +312,17 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
 
   const continuedFooter = (carriedQty: number, carriedAmount: number) => (
     <div
-      className="grid grid-cols-[64%_20%_16%] text-[10px]"
+      className="grid grid-cols-[64%_20%_16%] text-[12px]"
       style={{ borderTop: `1px solid ${INK}` }}
     >
       <div
-        className="px-2 py-2 italic text-slate-600"
+        className="px-3 py-2 italic text-slate-600"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         Continued on next page
       </div>
       <div
-        className="px-2 py-2 font-semibold text-right tabular-nums"
+        className="px-3 py-2 font-semibold text-right tabular-nums"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         Carried Fwd: {carriedQty}
@@ -336,35 +336,35 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
   const finalFooter = (
     <div>
       <div
-        className="grid grid-cols-[64%_36%] text-[10px]"
+        className="grid grid-cols-[64%_36%] text-[12px]"
         style={{ borderTop: `1px solid ${INK}` }}
       >
         <div
-          className="px-2 py-2 flex flex-col justify-between"
+          className="px-3 py-2 flex flex-col justify-between"
           style={{ borderRight: `1px solid ${INK}` }}
         >
           <div>
-            <div className="font-semibold">Amount (in words)</div>
-            <div className="italic text-slate-700 leading-tight mt-0.5">{words}</div>
+            <div className="font-semibold text-[11px]">Amount (in words)</div>
+            <div className="italic text-slate-700 leading-snug mt-0.5 text-[12px]">{words}</div>
           </div>
-          <div className="font-semibold mt-2">Total Quantity: {totalQuantity}</div>
+          <div className="font-semibold mt-2 text-[12px]">Total Quantity: {totalQuantity}</div>
         </div>
 
         <div>
-          <div className="flex justify-between px-3 py-1">
+          <div className="flex justify-between px-3 py-1.5">
             <span>Subtotal</span>
-            <span className="tabular-nums">{money(subtotal)}</span>
+            <span className="tabular-nums font-semibold">{money(subtotal)}</span>
           </div>
 
           {taxRows.map((row) => (
-            <div key={row.label} className="flex justify-between px-3 py-1">
+            <div key={row.label} className="flex justify-between px-3 py-1.5">
               <span>{row.label}</span>
-              <span className="tabular-nums">{money(row.value)}</span>
+              <span className="tabular-nums font-semibold">{money(row.value)}</span>
             </div>
           ))}
 
           <div
-            className="flex justify-between px-3 py-2 font-bold text-white"
+            className="flex justify-between px-3 py-2 font-bold text-white text-[13.5px]"
             style={{ background: INK, borderTop: `1px solid ${INK}` }}
           >
             <span>TOTAL</span>
@@ -374,7 +374,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
       </div>
 
       <div
-        className="px-2 py-2 text-[9px] leading-relaxed"
+        className="px-3 py-2 text-[11px] leading-relaxed"
         style={{ borderTop: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}
       >
         <span className="font-bold mr-4">Bank Details</span>
@@ -400,8 +400,8 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
         </span>
       </div>
 
-      <div className="grid grid-cols-3 px-3 pt-5 pb-3 text-[9px] text-slate-600 items-end">
-        <div className="text-left uppercase">Receiver's Signature</div>
+      <div className="grid grid-cols-3 px-4 pt-6 pb-3 text-[11px] text-slate-600 items-end">
+        <div className="text-left uppercase font-medium">Receiver's Signature</div>
         <div className="text-center text-slate-400">E. &amp; O.E.</div>
         <div className="text-right uppercase font-semibold">For {businessName}</div>
       </div>
@@ -413,8 +413,8 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
     height: `${A4.safeHeightMm}mm`,
     padding: `${PADDING_MM}mm`,
     boxSizing: "border-box",
-    fontSize: "11px",
-    lineHeight: 1.25,
+    fontSize: "12.5px",
+    lineHeight: 1.35,
   };
 
   if (!invoice) return null;
@@ -446,12 +446,12 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
         <div style={{ border: `1px solid ${INK}` }}>
           <div ref={chromeRef as React.RefObject<HTMLDivElement>}>
             {letterhead(0, 1)}
-            <table className="w-full table-fixed text-[9px] border-collapse">
+            <table className="w-full table-fixed text-[12.5px] border-collapse">
               {tableHead}
             </table>
           </div>
 
-          <table className="w-full table-fixed text-[9px] border-collapse">
+          <table className="w-full table-fixed text-[12.5px] border-collapse">
             <tbody ref={rowsRef as React.RefObject<HTMLTableSectionElement>}>
               {items.map((item, index) => itemRow(item, index, index % 2 === 1))}
             </tbody>
@@ -499,7 +499,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
 
                 <div className="flex-grow flex flex-col overflow-hidden">
                   <table
-                    className="w-full h-full table-fixed text-[9px] border-collapse"
+                    className="w-full h-full table-fixed text-[12.5px] border-collapse"
                     style={{ height: "100%" }}
                   >
                     {tableHead}

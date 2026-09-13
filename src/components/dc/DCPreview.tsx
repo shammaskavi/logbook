@@ -83,23 +83,23 @@ export function DCPreview({
   const letterhead = (pageIndex: number, pageCount: number, copyLabel: string) => (
     <div>
       <div
-        className="grid grid-cols-[44px_1fr_150px]"
+        className="grid grid-cols-[auto_1fr_180px]"
         style={{ borderBottom: `1px solid ${INK}` }}
       >
         <div
-          className="p-1.5 flex items-center justify-center"
-          style={{ borderRight: `1px solid ${INK}` }}
+          className="p-2 flex items-center justify-center aspect-square h-full"
+          style={{ borderRight: `1px solid ${INK}`, aspectRatio: "1 / 1" }}
         >
           {logoUrl ? (
             <img
               src={logoUrl}
               alt=""
               crossOrigin="anonymous"
-              style={{ width: 30, height: 30, objectFit: "contain" }}
+              style={{ width: "100%", height: "100%", maxWidth: 44, maxHeight: 44, objectFit: "contain" }}
             />
           ) : (
             <div
-              className="w-8 h-8 text-white flex items-center justify-center font-bold text-base leading-none"
+              className="w-10 h-10 aspect-square text-white flex items-center justify-center font-bold text-lg leading-none"
               style={{ background: INK }}
             >
               {businessInitials}
@@ -107,25 +107,25 @@ export function DCPreview({
           )}
         </div>
 
-        <div className="p-1.5">
+        <div className="p-2 flex flex-col justify-center">
           <div
-            className="text-sm font-bold uppercase leading-tight"
+            className="text-[17px] font-bold uppercase leading-tight"
             style={{ color: INK }}
           >
             {businessName}
           </div>
-          <div className="text-[8px] text-slate-700 leading-tight mt-0.5 whitespace-pre-line">
+          <div className="text-[11px] text-slate-700 leading-tight mt-0.5 whitespace-pre-line">
             {businessAddress}
           </div>
         </div>
 
-        <div className="text-[8px]" style={{ borderLeft: `1px solid ${INK}` }}>
+        <div className="text-[11px] flex flex-col justify-center" style={{ borderLeft: `1px solid ${INK}` }}>
           {businessGstin && (
-            <div className="px-2 py-1" style={{ borderBottom: `1px solid ${INK}` }}>
+            <div className="px-2.5 py-1" style={{ borderBottom: `1px solid ${INK}` }}>
               <span className="font-semibold">GSTIN:</span> {businessGstin}
             </div>
           )}
-          <div className="px-2 py-1">
+          <div className="px-2.5 py-1">
             <span className="font-semibold">Ph:</span> {businessPhone}
           </div>
         </div>
@@ -134,44 +134,44 @@ export function DCPreview({
       {/* Title bar carries the copy designation, which Rule 55(2) requires to
           be marked on the face of each copy. */}
       <div
-        className="flex items-center justify-between px-2 text-white font-bold py-1 uppercase"
+        className="flex items-center justify-between px-3 text-white font-bold py-1.5 uppercase"
         style={{ background: INK, borderBottom: `1px solid ${INK}` }}
       >
-        <span className="text-[8px] font-semibold opacity-0 select-none">
+        <span className="text-[11px] font-semibold opacity-0 select-none">
           {copyLabel}
         </span>
-        <span className="tracking-wide">Delivery Challan</span>
-        <span className="text-[8px] font-semibold tracking-tight">{copyLabel}</span>
+        <span className="tracking-wider text-[13px]">Delivery Challan</span>
+        <span className="text-[11px] font-semibold tracking-tight">{copyLabel}</span>
       </div>
 
       <div
-        className="grid grid-cols-[1fr_120px_120px] text-[9px]"
+        className="grid grid-cols-[1fr_140px_140px] text-[12px]"
         style={{ borderBottom: `1px solid ${INK}` }}
       >
-        <div className="px-2 py-1.5" style={{ borderRight: `1px solid ${INK}` }}>
+        <div className="px-3 py-2" style={{ borderRight: `1px solid ${INK}` }}>
           <div>
             <span className="font-semibold">To:</span>{" "}
-            <span className="font-bold uppercase">{partyName || "-"}</span>
+            <span className="font-bold uppercase text-[13px]">{partyName || "-"}</span>
           </div>
           {partyGstin && (
-            <div className="mt-0.5">
+            <div className="mt-0.5 text-[11px]">
               <span className="font-semibold">GSTIN:</span> {partyGstin}
             </div>
           )}
         </div>
 
-        <div className="px-2 py-1.5" style={{ borderRight: `1px solid ${INK}` }}>
+        <div className="px-3 py-2" style={{ borderRight: `1px solid ${INK}` }}>
           <span className="font-semibold">DC No:</span>{" "}
-          <span className="font-bold" style={{ color: INK }}>
+          <span className="font-bold text-[13px]" style={{ color: INK }}>
             {dcNumber}
           </span>
         </div>
 
-        <div className="px-2 py-1.5 flex flex-col justify-between">
+        <div className="px-3 py-2 flex flex-col justify-between">
           <div>
             <span className="font-semibold">Date:</span> {displayDate}
           </div>
-          <div className="text-[7px] text-slate-500 font-semibold mt-0.5">
+          <div className="text-[10px] text-slate-500 font-semibold mt-0.5">
             Page {pageIndex + 1} of {pageCount}
           </div>
         </div>
@@ -181,21 +181,21 @@ export function DCPreview({
 
   const tableHead = (
     <thead>
-      <tr className="uppercase font-bold" style={{ background: "#F5E7D9", color: INK }}>
+      <tr className="uppercase font-bold text-[12px]" style={{ background: "#F5E7D9", color: INK }}>
         <th
-          className="w-[14%] px-2 py-[3px] text-left"
+          className="w-[15%] px-3 py-1.5 text-left"
           style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}
         >
           WO No.
         </th>
         <th
-          className="w-[63%] px-2 py-[3px] text-left"
+          className="w-[60%] px-3 py-1.5 text-left"
           style={{ borderRight: `1px solid ${INK}`, borderBottom: `1px solid ${INK}` }}
         >
           Particulars
         </th>
         <th
-          className="w-[23%] px-2 py-[3px] text-right"
+          className="w-[25%] px-3 py-1.5 text-right"
           style={{ borderBottom: `1px solid ${INK}` }}
         >
           Quantity
@@ -207,18 +207,18 @@ export function DCPreview({
   const itemRow = (item: DCPreviewItem | undefined, key: number, striped: boolean) => (
     <tr key={key} className={striped ? "bg-slate-50" : "bg-white"}>
       <td
-        className="px-2 py-[3px] align-top"
+        className="px-3 py-1.5 align-top font-medium"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         {item?.work_order_number || "-"}
       </td>
       <td
-        className="px-2 py-[3px] align-top break-words"
+        className="px-3 py-1.5 align-top break-words font-medium"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         {item?.job_work_type_name || "-"}
       </td>
-      <td className="px-2 py-[3px] text-right align-top tabular-nums font-semibold">
+      <td className="px-3 py-1.5 text-right align-top tabular-nums font-bold">
         {Number(item?.quantity || 0)}
       </td>
     </tr>
@@ -234,17 +234,17 @@ export function DCPreview({
 
   const continuedFooter = (carriedQty: number) => (
     <div
-      className="grid grid-cols-[77%_23%] text-[9px]"
+      className="grid grid-cols-[75%_25%] text-[12px]"
       style={{ borderTop: `1px solid ${INK}` }}
     >
       <div
-        className="px-2 py-1.5 italic text-slate-600"
+        className="px-3 py-2 italic text-slate-600"
         style={{ borderRight: `1px solid ${INK}` }}
       >
         Continued on next page
       </div>
       <div
-        className="px-2 py-1.5 text-right font-bold tabular-nums"
+        className="px-3 py-2 text-right font-bold tabular-nums"
         style={{ background: "#F5E7D9", color: INK }}
       >
         C/F {carriedQty}
@@ -255,18 +255,18 @@ export function DCPreview({
   const finalFooter = (
     <div>
       <div
-        className="grid grid-cols-[77%_23%] text-[9px]"
+        className="grid grid-cols-[75%_25%] text-[12px]"
         style={{ borderTop: `1px solid ${INK}` }}
       >
-        <div className="px-2 py-1.5" style={{ borderRight: `1px solid ${INK}` }}>
+        <div className="px-3 py-2" style={{ borderRight: `1px solid ${INK}` }}>
           <span className="font-semibold">Transporter:</span>{" "}
           {transporterName || "Self"}
           <span className="mx-3">|</span>
           <span className="font-semibold">No. of Bundles:</span>{" "}
-          <span className="inline-block border-b border-slate-400 w-16" />
+          <span className="inline-block border-b border-slate-400 w-20" />
         </div>
         <div
-          className="px-2 py-1.5 text-right font-bold tabular-nums"
+          className="px-3 py-2 text-right font-bold tabular-nums text-[13px]"
           style={{ background: "#F5E7D9", color: INK }}
         >
           {totalQuantity}
@@ -274,17 +274,17 @@ export function DCPreview({
       </div>
 
       <div
-        className="px-2 py-1 text-[7px] text-slate-500 italic"
+        className="px-3 py-1.5 text-[9.5px] text-slate-500 italic"
         style={{ borderTop: `1px solid ${INK}` }}
       >
         Goods sent for job work only. Not a sale — this challan is not a tax invoice.
       </div>
 
       <div
-        className="grid grid-cols-3 px-3 pt-4 pb-2 text-[8px] text-slate-600 items-end"
+        className="grid grid-cols-3 px-4 pt-5 pb-3 text-[11px] text-slate-600 items-end"
         style={{ borderTop: `1px solid ${INK}` }}
       >
-        <div className="text-left uppercase">Receiver's Signature</div>
+        <div className="text-left uppercase font-medium">Receiver's Signature</div>
         <div className="text-center text-slate-400">&nbsp;</div>
         <div className="text-right uppercase font-semibold">For {businessName}</div>
       </div>
@@ -296,8 +296,8 @@ export function DCPreview({
     padding: `${PADDING_MM}mm`,
     boxSizing: "border-box",
     fontFamily: "Arial, sans-serif",
-    fontSize: "10px",
-    lineHeight: 1.2,
+    fontSize: "13px",
+    lineHeight: 1.35,
   };
 
   const pageCount = pages.length;
@@ -316,7 +316,7 @@ export function DCPreview({
 
         <div className="flex-grow flex flex-col overflow-hidden">
           <table
-            className="w-full table-fixed text-[9px] border-collapse"
+            className="w-full table-fixed text-[12.5px] border-collapse"
             style={{ height: "100%" }}
           >
             {tableHead}
@@ -359,12 +359,12 @@ export function DCPreview({
         <div style={{ border: `1px solid ${INK}` }}>
           <div ref={chromeRef as React.RefObject<HTMLDivElement>}>
             {letterhead(0, 1, copies[0])}
-            <table className="w-full table-fixed text-[9px] border-collapse">
+            <table className="w-full table-fixed text-[12.5px] border-collapse">
               {tableHead}
             </table>
           </div>
 
-          <table className="w-full table-fixed text-[9px] border-collapse">
+          <table className="w-full table-fixed text-[12.5px] border-collapse">
             <tbody ref={rowsRef as React.RefObject<HTMLTableSectionElement>}>
               {items.map((item, index) => itemRow(item, index, index % 2 === 1))}
             </tbody>
@@ -408,7 +408,7 @@ export function DCPreview({
                       className="absolute left-0 right-0 bottom-0 flex items-center justify-center"
                       style={{ transform: "translateY(50%)" }}
                     >
-                      <span className="bg-white px-2 text-[6px] uppercase tracking-widest text-slate-400">
+                      <span className="bg-white px-2 text-[7px] uppercase tracking-widest text-slate-400">
                         cut here
                       </span>
                     </div>
