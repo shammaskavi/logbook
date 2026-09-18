@@ -93,7 +93,7 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
 
   const logoUrl = businessSettings?.logo_url
     ? supabase.storage.from("business-logos").getPublicUrl(businessSettings.logo_url)
-        .data.publicUrl
+      .data.publicUrl
     : null;
 
   const businessAddress =
@@ -110,9 +110,9 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
   const taxRows =
     gstType === "cgst_sgst"
       ? [
-          { label: `CGST @ ${cgstPercent}%`, value: cgstAmount },
-          { label: `SGST @ ${sgstPercent}%`, value: sgstAmount },
-        ]
+        { label: `CGST @ ${cgstPercent}%`, value: cgstAmount },
+        { label: `SGST @ ${sgstPercent}%`, value: sgstAmount },
+      ]
       : gstType === "igst"
         ? [{ label: `IGST @ ${igstPercent}%`, value: igstAmount }]
         : [];
@@ -404,6 +404,22 @@ export default function InvoicePreview({ invoice }: InvoicePreviewProps) {
         <div className="text-left uppercase font-medium">Receiver's Signature</div>
         <div className="text-center text-slate-400">E. &amp; O.E.</div>
         <div className="text-right uppercase font-semibold">For {businessName}</div>
+      </div>
+
+      <div
+        className="py-1 px-3 text-center text-[9px] text-slate-500 tracking-wider flex items-center justify-center gap-1.5"
+        style={{ borderTop: `1px solid ${INK}`, background: "#FAF7F5" }}
+      >
+        <span className="uppercase font-medium text-slate-600">Powered by Tovak</span>
+        <span className="text-slate-400">•</span>
+        <a
+          href="https://tovak.in"
+          target="_blank"
+          rel="noreferrer"
+          className="text-slate-600 font-semibold hover:underline print:no-underline"
+        >
+          tovak.in
+        </a>
       </div>
     </div>
   );
